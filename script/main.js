@@ -194,7 +194,8 @@ let defaultOptions = {
     },
     zelda1: {
         mapLogic: "minorGlitches",
-        mPos: "Above"
+        mPos: "Above",
+        mapSwords: true,
     },
     metroid3: {
         chestSkin: "lights",
