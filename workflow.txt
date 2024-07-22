@@ -1,0 +1,7 @@
+index.html
+  script/loader/lazyload.js // Set up LazyLoad
+  script/manifest.js        // Get Master Manifest
+    Title of Combo Rando
+    Nickname of Combo Rando
+    Games included in Combo Rando
+  script/shared.js          // Common functions
