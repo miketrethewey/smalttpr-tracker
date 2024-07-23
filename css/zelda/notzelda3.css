@@ -1,3 +1,5 @@
-.metroid3 .zelda3-option {
+.metroid .zelda-option,
+.metroid .zelda3-option,
+.zelda1 .zelda3-option {
     display: none;
 }

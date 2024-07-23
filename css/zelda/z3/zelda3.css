@@ -1,3 +1,6 @@
+.zelda3-hidden {
+  display: none;
+}
 .zelda3-regions #beta {
   display: block !important;
 }

@@ -23,6 +23,3 @@
 .metroid3 .mapdiv #mapoverlay.on {
     background-image: url(../../../images/metroid3/maps/mapregions.png) !important;
 }
-.metroid3 .metroid1-option {
-    display: none;
-}
