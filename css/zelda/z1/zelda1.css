@@ -33,8 +33,14 @@
     /* top: 25px; */
 }
 
+.item-zelda1.moon,
 .item-zelda1.dragon {
     background-position: 0 -12px;
+}
+
+.zelda1 #bossMap3,
+.zelda1 #bossMap7 {
+    transform: rotate(180deg);
 }
 
 .zelda1 .prizeImage {
