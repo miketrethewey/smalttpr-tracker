@@ -132,7 +132,7 @@ class DeathMountainWest extends DeathMountain {
 
     if(this.buildLocations) {
         this.locations["Ether Tablet"].owGlitches = function() {
-            let toh = new DungeonsTowerOfHera("","",false);
+            let toh = new Z3DungeonsTowerOfHera("","",false);
             toh.canEnter.owGlitches();
 
             return canActivateTablets()

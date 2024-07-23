@@ -44,25 +44,25 @@
                 <legend>Item Tracker</legend>
                 <button type="button" onclick="EditMode()" style="float:right;">Edit Mode</button>
                 <span style="white-space:nowrap;">Size<input type="range" name='itemdivsize' value='100' max='200' min='1' onchange="setZoom('itemdiv', this)"><span id='itemdivsize'>100%</span></span><br />
-                <div class="zelda-option">
+                <div>
                     <fieldset>
                         <legend>Dungeon Display</legend>
+                        <input class="zelda-option" type="checkbox" name="showchest" id="showchest" checked='checked' onchange="showChest(this)"><label class="zelda-option" for="showchest">Chests</label>
+                        <input type="checkbox" name="showcrystal" id="showcrystal" checked='checked' onchange="showCrystal(this)"><label for="showcrystal">Prizes</label>
+                        <input type="checkbox" name="showlabel" id="showlabel" checked='checked' onchange="showLabel(this)"><label for="showlabel">Labels</label>
                         <div class="zelda3-option">
-                            <input type="checkbox" name="showchest" id="showchest" checked='checked' onchange="showChest(this)"><label for="showchest">Chests</label>
-                            <input type="checkbox" name="showcrystal" id="showcrystal" checked='checked' onchange="showCrystal(this)"><label for="showcrystal">Prizes</label>
                             <input type="checkbox" name="showmedallion" id="showmedallion" checked='checked' onchange="showMedallion(this)"><label for="showmedallion">Medals</label><br />
                         </div>
-                        <input type="checkbox" name="showlabel" id="showlabel" checked='checked' onchange="showLabel(this)"><label for="showlabel">Labels</label>
                     </fieldset>
-                    <button onclick="resetCookie();">Reset Progression</button>
                 </div>
+                <button onclick="resetCookie();">Reset Progression</button>
             </fieldset>
             <fieldset>
                 <legend>Map Tracker</legend>
                 <span style="float:right;">
                   <input type="checkbox" name="showmap" id="showmap" checked='checked' onchange="showTracker('mapdiv', this)">
                   <label for="showmap">Enabled</label><br />
-                  <span class="smalttpr-option"><input type="checkbox" id="mapRegions" onchange="showRegions(this)" /><label for="mapRegions">Regions</label><br /></span>
+                  <span class="zelda3-option metroid3-option"><input type="checkbox" id="mapRegions" onchange="showRegions(this)" /><label for="mapRegions">Regions</label><br /></span>
                   <span class="zelda3-option"><input type="checkbox" id="mapWarps" checked='checked' onchange="showWarps(this)" /><label for="mapWarps">Warps</label><br /></span>
                   <input type="checkbox" id="mapPortals" checked='checked' onchange="showPortals(this)" /><label for="mapPortals">Portals</label>
                 </span>
@@ -72,18 +72,26 @@
                     <input type='radio' name='maporientation' id="mOrien1" value='Horizontal' checked='checked' onclick="setMapOrientation(false)"><label for="mOrien1">Horizontal</label>
                     <input type='radio' name='maporientation' id="mOrien2" value='Vertical' onclick="setMapOrientation(true)"><label for="mOrien2">Vertical</label>
                 </div>
-                <div class="metroid-option" style="clear:right;"></div>
-                <fieldset class="lozmx-option hidden">
-                    <legend>LoZMx Options</legend>
-                    <input type="checkbox" name="nonvanilla" id="nonvanilla" selected="selected" onchange="showNonVanilla(this)" class="hidden"><label for="nonvanilla" class="hidden">Non-Vanilla slots?</label>
-                </fieldset>
-                <fieldset class="zelda3-option">
+                <div style="clear:right;"></div>
+                <fieldset class="zelda-option zelda3-option">
                     <legend>Position</legend>
                     <input type='radio' name='mapposition' id="mPos1" value='Above' onclick="setOrder(0)"><label for="mPos1">Above</label>
                     <input type='radio' name='mapposition' id="mPos2" value='Below' checked='checked' onclick="setOrder(1)"><label for="mPos2">Below</label>
                     <input type='radio' name='mapposition' id="mPos3" value='Side' onclick="setOrder(2)"><label for="mPos3">Side</label>
                 </fieldset>
-                <fieldset class="zelda3-option">
+                <fieldset class="lozmx-option hidden">
+                    <legend>LoZMx Options</legend>
+                    <input type="checkbox" name="nonvanilla" id="nonvanilla" selected="selected" onchange="showNonVanilla(this)" class="hidden"><label for="nonvanilla" class="hidden">Non-Vanilla slots?</label>
+                </fieldset>
+                <fieldset class="zelda1-option">
+                    <legend>TLoZ Options</legend>
+                    <fieldset>
+                        <legend>Quest</legend>
+                        <input type='radio' name='quest' id="quest1" value='q1' checked='checked' onclick="setQuest(1)"><label for="quest1">First</label>
+                        <input type='radio' name='auest' id="quest2" value='q2' onclick="setQuest(2)" disabled="disabled"><label for="quest2">Second</label>
+                    </fieldset>
+                </fieldset>
+                <fieldset class="zelda-option zelda3-option">
                     <legend>ALttP Options</legend>
                     <!-- Zelda 3 -->
                     <fieldset>
@@ -124,26 +132,26 @@
                     <table border="0" cellspacing="0" id="legend" class="legend" style="width:100%;">
                         <tr>
                             <th class="available">Available</th>
-                            <th class="glitchavailable zelda3-option">Glitch Available</th>
+                            <th class="glitchavailable zelda-option zelda3-option">Glitch Available</th>
                         </tr>
                         <tr>
-                            <th class="possible zelda3-option">Possible<br />Viewable</th>
-                            <th class="glitchpossible zelda3-option">Glitch Possible<br />Glitch Viewable</th>
+                            <th class="possible zelda-option zelda3-option">Possible<br />Viewable</th>
+                            <th class="glitchpossible zelda-option zelda3-option">Glitch Possible<br />Glitch Viewable</th>
                         </tr>
                         <tr>
-                            <th class="agahnim zelda3-option">Agahnim Defeated</th>
-                            <th class="glitchagahnim zelda3-option">Glitch Agahnim</th>
+                            <th class="agahnim zelda-option zelda3-option">Agahnim Defeated</th>
+                            <th class="glitchagahnim zelda-option zelda3-option">Glitch Agahnim</th>
                         </tr>
                         <tr>
                             <th class="unavailable">Unavailable</th>
                             <th class="opened zelda3-option">Opened</th>
                         </tr>
-                        <tr class="metroid3-option">
-                            <th class="opened">Opened</th>
+                        <tr class="">
+                            <th class="opened zelda3-hidden">Opened</th>
                         </tr>
                     </table>
                 </fieldset>
-                <fieldset class="zelda3-option zelda3-regions">
+                <fieldset class="zelda-option zelda3-option zelda3-regions">
                     <legend>Dungeon Legend</legend>
                     <table border="0" cellspacing="0" id="legend" class="legend" style="width:100%;">
                         <tr>

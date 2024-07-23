@@ -50,10 +50,10 @@ manifests[g] = {
             "z3glove",
         ],
         [
-            "m3kraid",
-            "m3phantoon",
-            "m3draygon",
-            "m3ridley",
+            "m3boss2",
+            "m3boss4",
+            "m3boss6",
+            "m3boss8",
             "m3rtank",
             "z3flippers",
             "z3moonpearl",
@@ -87,16 +87,21 @@ manifests[g] = {
         m3draygon:      { name: "Draygon Kill Credit" },
         m3ridley:       { name: "Ridley Kill Credit" },
 
-        m3boss0:        { name: "Bomb Torizo Kill Credit",  min: 1, max: 2 },
-        m3boss1:        { name: "Spore Spawn Kill Credit",  min: 1, max: 2 },
-        m3boss2:        { name: "Kraid Kill Credit",        min: 1, max: 2 },
-        m3boss3:        { name: "Crocomire Kill Credit",    min: 1, max: 2 },
-        m3boss4:        { name: "Phantoon Kill Credit",     min: 1, max: 2 },
-        m3boss5:        { name: "Botwoon Kill Credit",      min: 1, max: 2 },
-        m3boss6:        { name: "Draygon Kill Credit",      min: 1, max: 2 },
-        m3boss7:        { name: "Gold Torizo Kill Credit",  min: 1, max: 2 },
-        m3boss8:        { name: "Ridley Kill Credit",       min: 1, max: 2 },
-        m3boss9:        { name: "Mother Brain Kill Credit", min: 1, max: 2 }
+        m3boss0:        {
+            name: "Bomb Torizo Kill Credit",
+            chests: 0,
+            min: 1,
+            max: 2
+        },
+        m3boss1:        { name: "Spore Spawn Kill Credit",  chests: 0, min: 1, max: 2 },
+        m3boss2:        { name: "Kraid Kill Credit",        chests: 0, min: 1, max: 2 },
+        m3boss3:        { name: "Crocomire Kill Credit",    chests: 0, min: 1, max: 2 },
+        m3boss4:        { name: "Phantoon Kill Credit",     chests: 0, min: 1, max: 2 },
+        m3boss5:        { name: "Botwoon Kill Credit",      chests: 0, min: 1, max: 2 },
+        m3boss6:        { name: "Draygon Kill Credit",      chests: 0, min: 1, max: 2 },
+        m3boss7:        { name: "Gold Torizo Kill Credit",  chests: 0, min: 1, max: 2 },
+        m3boss8:        { name: "Ridley Kill Credit",       chests: 0, min: 1, max: 2 },
+        m3boss9:        { name: "Mother Brain Kill Credit", chests: 0, min: 1, max: 2 }
     },
     regions: {
         crateria: [
@@ -132,10 +137,9 @@ manifests[g] = {
         chestSkin:  "lights",
         mapLogic:   "casualLogic",
         mPos:       "Above",
-        mZoom:      100
+        mZoom:      100,
+        showPrizes: true
     },
-    dungeonchestsInit:  {},
     dungeonBeatenInit:  Array(bosses).fill(false),
-    prizesInit:         Array(bosses).fill(0),
-    medallionsInit:     Array(bosses).fill(0)
+    prizesInit:         Array(bosses).fill(4)
 };

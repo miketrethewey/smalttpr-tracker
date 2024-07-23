@@ -32,9 +32,6 @@ manifests[g] = {
             "m1boss1",
             "m1kraidtotem",
             "m1ridleytotem"
-        ],
-        [
-            "m1boss2"
         ]
     ],
     items: {
@@ -64,10 +61,10 @@ manifests[g] = {
     },
     defaultSettings: {
         mapLogic:   "casualLogic",
-        mPos:       "Above"
+        mPos:       "Above",
+        showPrizes: true
     },
     dungeonchestsInit:  {},
     dungeonBeatenInit:  Array(bosses).fill(false),
-    prizesInit:         Array(bosses).fill(0),
-    medallionsInit:     Array(bosses).fill(0)
+    prizesInit:         Array(bosses).fill(6)
 };

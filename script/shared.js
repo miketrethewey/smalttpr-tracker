@@ -45,7 +45,8 @@ var regionObjects = {}; // Collect region objects to call in logic
 var regionNames = {};   // Collect region names
 
 // Z3 can use canned breadth logic or graph logic
-var zeldaMode = getParameterByName("zeldaMode",window.location,"oldstyle");
+// var zeldaMode = getParameterByName("zeldaMode",window.location,"oldstyle");
+var zeldaMode = getParameterByName("zeldaMode",window.location,"regions");
 
 // FIXME: I don't remember what this does
 var metroidMode = getParameterByName("metroidMode",window.location,"");
@@ -109,6 +110,7 @@ function build_img_url(item,useGame = selectedGame) {
     // Not Boss & not Chest
     let itemKey = item;
     let itemKe  = Number.isInteger(parseInt(item.substr(-1))) ? item.substr(0,item.length-1) : item;
+    let itemLvl = Number.isInteger(parseInt(item.substr(-1))) ? parseInt(item.substr(-1)) : 0;
     if(
         (item.indexOf("boss") == -1) &&
         (item.indexOf("chest") == -1)
@@ -132,49 +134,76 @@ function build_img_url(item,useGame = selectedGame) {
                 useGame = gameCheck;
             }
         }
-    }
-    // Z1Gohma is animated because why not
-    if(item == "z1boss5") {
-        filext = "gif";
+    } else {
+        if(itemKey.indexOf("chest") > -1) {
+            useGame = "zelda3";
+        }
+        // Z1Gohma is animated because why not
+        if(itemKe == "z1boss5") {
+            filext = "gif";
+        }
     }
 
     // Shave off the prefix
     let prefix = manifests[useGame]["prefix"];
     if(item.startsWith(prefix)) {
-        item = item.replace(manifests[useGame]["prefix"],"");
+        item = item.replace(prefix,"");
+    }
+    if(itemKey.startsWith(prefix)) {
+        itemKey = itemKey.replace(prefix,"");
+    }
+    if(itemKe.startsWith(prefix)) {
+        itemKe = itemKe.replace(prefix,"");
     }
 
-    var globalReplaceItem = {
-        agahnim:    "agahnim1",     // Z3 Lumberjack Tree: Mini
-        bomb:       "bomb1",        // Z3Bombs: Mini
-        bomb0:      "bomb1",        // Z3Bombs: Off
-        boomerang0: "boomerang1",   // Z3Boomerang: Off
-        bottle:     "bottle1",      // Z3Bottle: Mini
-        flute:      "flute0",       // Z3 Weathervane
-        glove0:     "glove1",       // Z3Glove: Off
-        // lamp:       "lantern",   // FIXME: Maybe unused?
-        medallion1: "bombos",       // Z3Bombos: Mini
-        medallion2: "ether",        // Z3Ether: Mini
-        medallion3: "quake",        // Z3Quake: Mini
-        shield0:    "shield1",      // Z3Shield: Off
-        sword0:     "sword1",       // Z3Sword: Off
-        pendant0:   "dungeon" + GREENPENDANT,   // Z3 Saha
-
-        bottle0:    "bottle1",      // Z1Bottle: Off
-        candle:     "candle1",      // Z1Candle: Mini
-        candle0:    "candle1",      // Z1Candle: Off
-        ring0:      "ring1",        // Z1Ring: Off
-    };
-    // Blue Crystal
-    globalReplaceItem["blueCrystal"]    = "dungeon" + CRYSTAL;
-    // Red Crystals
-    globalReplaceItem["redCrystal"]     = "dungeon" + OJCRYSTAL;
-    globalReplaceItem["crystal5"]       = "dungeon" + OJCRYSTAL;
-    globalReplaceItem["crystal6"]       = "dungeon" + OJCRYSTAL;
+    var gReplaceItem = [
+        // Bare -> 1
+        [
+            "agahnim",      // Z3 Lumberjack Tree: Mini
+            "bomb",         // Z3Bombs:     Mini
+            "bottle",       // Z3Bottle:    Mini
+            "flute",        // Z3 Weathervane
+            "candle"        // Z1Candle:    Mini
+        ],
+        // 0 -> 1
+        [
+            "bomb",         // Z3Bombs:     Off
+            "boomerang",    // Z3Boomerang: Off
+            "glove",        // Z3Glove:     Off
+            "shield",       // Z3Shield:    Off
+            "sword",        // Z3Sword:     Off
+            "bottle",       // Z1Bottle:    Off
+            "candle",       // Z1Candle:    Off
+            "ring"          // Z1Ring:      Off
+        ],
+        // Special cases
+        {
+            "medallion1":   "bombos", // Z3Bombos:    Mini
+            "medallion2":   "ether",  // Z3Ether:     Mini
+            "medallion3":   "quake",  // Z3Quake:     Mini
+            "pendant0":     "dungeon" + GREENPENDANT,   // Z3 Saha
+            "blueCrystal":  "dungeon" + CRYSTAL,    // Blue Crystal
+            "redCrystal":   "dungeon" + OJCRYSTAL,  // Red Crystal
+            "crystal5":     "dungeon" + OJCRYSTAL,  // Red Crystal
+            "crystal6":     "dungeon" + OJCRYSTAL   // Red Crystal
+        }
+    ];
 
     // See if we've got a replacement
-    if(globalReplaceItem[item]) {
-        item = globalReplaceItem[item];
+    if(itemLvl > 0) {
+        // console.log(itemKey,itemKe,itemLvl);
+    }
+    if(gReplaceItem[0].indexOf(itemKey) > -1) {
+        // console.log("> Bare -> 1:",itemKey,itemKey+"1");
+        item = itemKey + "1";
+    } else if(itemLvl == 0 && gReplaceItem[1].indexOf(itemKe) > -1) {
+        // console.log("> 0 -> 1:",itemKe+"0",itemKe+"1");
+        item = itemKe + "1";
+    } else if(gReplaceItem[2][item]) {
+        // console.log("> Special:",item,gReplaceItem[2][item]);
+        item = gReplaceItem[2][item];
+    } else {
+        // console.log("NOT FOUND: " + item);
     }
 
     // Default to inventory

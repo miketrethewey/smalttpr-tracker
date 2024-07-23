@@ -152,10 +152,10 @@ class Z3DungeonsMiseryMire extends Z3Dungeons {
               && dwm.canEnter.majorGlitches();
       }
       this.canComplete.majorGlitches = function() {
-          let toh = new DungeonsTowerOfHera("","",false);
+          let toh = new Z3DungeonsTowerOfHera("","",false);
           toh.initMajorGlitches();
 
-          let sp = new DungeonsSwampPalace("","",false);
+          let sp = new Z3DungeonsSwampPalace("","",false);
           sp.initMajorGlitches();
 
           return (this.canEnter.majorGlitches()

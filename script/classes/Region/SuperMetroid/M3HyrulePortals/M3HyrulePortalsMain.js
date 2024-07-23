@@ -17,7 +17,7 @@ class M3HyrulePortalsMain extends M3HyrulePortals {
         return (cc.canEnter.casualLogic() && canAccessLightWorldPortal()) || canAccessCrateriaPortal();
     }
     this.locations["ALttPR Portal: Death Mountain Cave"].casualLogic = function() {
-        let nw = new NorfairWest("","",false);
+        let nw = new M3NorfairWest("","",false);
         nw.initCasual();
         return (nw.canEnter.casualLogic() && canAccessDeathMountainPortal()) || canAccessNorfairPortal();
     }

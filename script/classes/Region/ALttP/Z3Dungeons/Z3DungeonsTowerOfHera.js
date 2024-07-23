@@ -160,7 +160,7 @@ class Z3DungeonsTowerOfHera extends Z3Dungeons {
               || mire());
       }
       this.canComplete.majorGlitches = function() {
-          let sp = new DungeonsSwampPalace("","",false);
+          let sp = new Z3DungeonsSwampPalace("","",false);
           sp.initMajorGlitches();
 
           return (((main() && has("bigkey"))

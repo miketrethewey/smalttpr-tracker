@@ -60,9 +60,24 @@ gameItems.averge1 = [
 
 for(let gameID of megaManifest["gameSets"][gameSet]["games"]) {
     chests[gameID] = [];
+    defaultItemGrid[gameID] = manifests[gameID]["defaultGrid"];
     dungeons[gameID] = [];
+    dungeonbeatenInit[gameID] = manifests[gameID]["dungeonBeatenInit"];
+    dungeonchestsInit[gameID] = [];
+    medallionsInit[gameID] = manifests[gameID]["medallionsInit"];
     gameItems[gameID] = Object.keys(manifests[gameID]["items"]);
+    prizesInit[gameID] = manifests[gameID]["prizesInit"];
 }
+console.log(
+    {
+        defaultGrid: defaultItemGrid,
+        dungeonBeaten: dungeonbeatenInit,
+        dungeonChests: dungeonchestsInit,
+        medallions: medallionsInit,
+        items: gameItems,
+        prizes: prizesInit
+    }
+);
 
 var itemsInit = {
     blank: false,
@@ -114,21 +129,36 @@ var itemsInit = {
     "a1range-node": 0
 };
 
-var prefixes = {"averge1":"a1"};
 for([gameID,items] of Object.entries(gameItems)) {
     if(gameID == "averge1") { continue; }
-    for(let idx in items) {
-        let item = items[idx];
-        let prefix = prefixes[gameID] ? prefixes[gameID] : "";
-        // gameItems[gameID][idx] = prefix + item;
-        let itemData = manifests[gameID]["items"][prefix + item];
-        itemNames[prefix + item] = itemData["name"];
-        itemsInit[prefix + item] = "min" in itemData ? itemData["min"] : false;
+    for(let item of items) {
+        let prefix = manifests[gameID]["prefix"] ? manifests[gameID]["prefix"] : "";
+        let itemKey = item;
+        if(
+            !itemKey.startsWith(prefix) &&
+            !itemKey.endsWith(prefix) &&
+            [
+                "mbm1",
+                "mbm3",
+                "ganonz1"
+            ].indexOf(itemKey) == -1
+        ) {
+            itemKey = prefix + itemKey;
+        }
+        let itemData = manifests[gameID]["items"][itemKey];
+        itemNames[itemKey] = itemData["name"];
+        itemsInit[itemKey] = "min" in itemData ? itemData["min"] : false;
+        if("chests" in itemData) {
+            let bossNum = item.substring(item.indexOf("boss") + ("boss").length);
+            dungeonchestsInit[gameID][bossNum] = itemData["chests"];
+            itemsMax[prefix + 'chest' + bossNum] = itemData["chests"];
+            // console.log(prefix,bossNum,dungeonchestsInit);
+        }
         if("min" in itemData) {
-            itemsMin[prefix + item] = itemData["min"];
+            itemsMin[itemKey] = itemData["min"];
         }
         if("max" in itemData) {
-            itemsMax[prefix + item] = itemData["max"];
+            itemsMax[itemKey] = itemData["max"];
         }
     }
 }

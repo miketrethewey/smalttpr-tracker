@@ -29,8 +29,12 @@
 }
 
 .zelda1 .dungeonCell .corner {
-    transform: rotate(-60deg);
-    top: 25px;
+    /* transform: rotate(-60deg); */
+    /* top: 25px; */
+}
+
+.item-zelda1.dragon {
+    background-position: 0 -12px;
 }
 
 .zelda1 .prizeImage {

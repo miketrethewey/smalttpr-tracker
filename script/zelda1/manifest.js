@@ -54,11 +54,18 @@ manifests[g] = {
             "z1boss0",
             "z1boss1",
             "z1boss2",
+        // ],
+        // [
             "z1boss3",
             "z1boss4",
             "z1boss5",
+        // ],
+        // [
             "z1boss6",
             "z1boss7",
+        ],
+        [
+            "z1boss8",
         ]
     ],
     items: {
@@ -87,6 +94,7 @@ manifests[g] = {
         z1boss0: {
             name: "Eagle",
             boss: "Aquamentus",
+            chests: 3,
             min: 1,
             max: 2,
             second: { name: "E" }
@@ -94,6 +102,7 @@ manifests[g] = {
         z1boss1: {
             name: "Moon",
             boss: "Dodongo",
+            chests: 2,
             min: 1,
             max: 2,
             second: { name: "A", boss: "Gleeok" }
@@ -101,6 +110,7 @@ manifests[g] = {
         z1boss2: {
             name: "Manji",
             boss: "Manhandla",
+            chests: 2,
             min: 1,
             max: 2,
             second: { name: "L", boss: "Dodongo" }
@@ -108,6 +118,7 @@ manifests[g] = {
         z1boss3: {
             name: "Snake",
             boss: "Gleeok",
+            chests: 2,
             min: 1,
             max: 2,
             second: { name: "D", boss: "Digdogger" }
@@ -115,6 +126,7 @@ manifests[g] = {
         z1boss4: {
             name: "Lizard",
             boss: "Digdogger",
+            chests: 2,
             min: 1,
             max: 2,
             second: { name: "Z", boss: "Gleeok" }
@@ -122,6 +134,7 @@ manifests[g] = {
         z1boss5: {
             name: "Dragon",
             boss: "Gohma",
+            chests: 2,
             min: 1,
             max: 2,
             second: { name: "Negative Space" }
@@ -129,6 +142,7 @@ manifests[g] = {
         z1boss6: {
             name: "Demon",
             boss: "Aquamentus II",
+            chests: 2,
             min: 1,
             max: 2,
             second: { name: "Downward Spiral", boss: "Gleeok II" }
@@ -136,6 +150,7 @@ manifests[g] = {
         z1boss7: {
             name: "Lion",
             boss: "Gleeok II",
+            chests: 3,
             min: 1,
             max: 2,
             second: { name: "Upward Spiral", boss: "Dodongo" }
@@ -143,6 +158,7 @@ manifests[g] = {
         z1boss8: {
             name: "Death Mountain",
             boss: "Ganon",
+            chests: 2,
             min: 1,
             max: 2,
             second: { name: "Pig" }
@@ -176,20 +192,10 @@ manifests[g] = {
     },
     defaultSettings: {
         mapLogic:   "minorGlitches",
-        mPos:       "Above"
-    },
-    dungeonchestsInit:  {
-        0: 3,   // Level 1: Eagle
-        1: 2,   // Level 2: Moon
-        2: 2,   // Level 3: Manji
-        3: 2,   // Level 4: Snake
-        4: 2,   // Level 5: Lizard
-        5: 2,   // Level 6: Dragon
-        6: 2,   // Level 7: Demon
-        7: 3,   // Level 8: Lion
-        8: 2,   // Level 9: Death Mountain
+        mPos:       "Above",
+        showChests: true,
+        showPrizes: true
     },
     dungeonBeatenInit:  Array(bosses).fill(false),
-    prizesInit:         Array(bosses).fill(0),
-    medallionsInit:     Array(bosses).fill(0)
+    prizesInit:         Array(bosses).fill(5)
 };

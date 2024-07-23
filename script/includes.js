@@ -62,7 +62,6 @@ gameSet = selectedGameSet;
 
 scripts.push("script/items.js");
 scripts.push("script/shared-access.js");
-scripts.push("script/" + selectedGame + "/items.js");
 
 var sheets = [
 ];
@@ -118,39 +117,41 @@ if(gameSet == "averge1") {
     scripts.push("script/classes/Region/AxiomVerge.js");
 }
 
+// Add Game CSS
 let universe = selectedGame.substr(0,selectedGame.length - 1);
 sheets.push("css/" + universe + '/' + universe.substr(0,1) + selectedGame.substr(-1) + '/' + universe + selectedGame.substr(-1) + ".css");
 
-if(gameSet != "quad") {
-    for(let u of ["zelda","metroid"]) {
-        if(universe != u) {
-            sheets.push(`css/${u}/not${u}.css`);
-        }
+// Add NotUniverse CSS
+for(let u of ["zelda","metroid"]) {
+    if(universe != u) {
+        sheets.push(`css/${u}/not${u}.css`);
     }
 }
+// Add NotCombo CSS
 for(let g of ["lozmx","smalttpr"]) {
     if(gameSet != g && gameSet != "quad") {
         sheets.push(`css/gamesets/not${g}.css`)
     }
 }
-if(gameSet != "quad") {
-    for(let g of ["zelda1","metroid1","zelda3","metroid3"]) {
-        if(selectedGame != g) {
-            let u = g.substr(0,g.length - 1);
-            sheets.push(`css/${u}/not${g}.css`)
-        }
+
+// Add NotGame CSS
+for(let g of ["zelda1","metroid1","zelda3","metroid3"]) {
+    if(selectedGame != g) {
+        let u = g.substring(0,g.length - 1);
+        sheets.push(`css/${u}/not${g}.css`)
     }
 }
 
-if(universe == "zelda" || gameSet == "quad") {
+// Add Universe CSS
+if(universe == "zelda") {
     sheets.push("css/zelda/zelda.css");
 }
-if(universe == "metroid" || gameSet == "quad") {
+if(universe == "metroid") {
     sheets.push("css/metroid/metroid.css");
 }
 
-sheets.push("css/portals.css");
-sheets.push("css/wrapup.css");
+sheets.push("css/portals.css"); // Portals
+sheets.push("css/wrapup.css");  // Wrap-Up
 scripts.push("script/classes/init.js");
 
 var regionNames = {
@@ -181,9 +182,9 @@ var regionNames = {
         ],
     },
     zelda3: {
-        z3dungeons: ["main"],
+        dungeons:   ["main"],
         overworld:  ["main"],
-        z3zebes:    ["z3-m3"],
+        zebes:      ["z3-m3"],
     },
     metroid1: {
         m1brinstar:         ["main"],
@@ -267,13 +268,7 @@ for(var gameName in regionNames) {
                 var segmentName = region[segment];
                 var url = "";
 
-                if(
-                    gameName == "metroid3" ||
-                    (gameName == "zelda3" && zeldaMode == "regions") ||
-                    gameSet == "lozmx" ||
-                    gameSet == "quad" ||
-                    gameSet == "averge1"
-                ) {
+                if(!(gameName == "zelda3" && zeldaMode == "oldstyle")) {
                     url += "script/classes/Region/";
 
                     let dirs = {
@@ -300,7 +295,7 @@ for(var gameName in regionNames) {
 scripts.push("script/vue/vue-2.5.16-min.js");
 scripts.push("script/main.js");
 
-// console.log({sheets:sheets,scripts:scripts});
+console.log({sheets:sheets,scripts:scripts});
 
 LazyLoad.css(sheets, function () {
 });
@@ -308,6 +303,7 @@ LazyLoad.css(sheets, function () {
 LazyLoad.js(scripts, function () {
     init(initClasses,selectedGame);
     init(initTracker,selectedGame);
+    document.body.classList.add(universe);
     if(selectedGame == "zelda3") {
         document.body.classList.add("zelda3-" + zeldaMode);
     } else if(selectedGame == "metroid3" && metroidMode != "") {

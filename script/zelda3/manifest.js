@@ -180,81 +180,182 @@ manifests[g] = {
         z3boss0: {
             name: "Eastern Palace",
             boss: "Armos Knights",
+            ditems: ["bigkey","compass","map"],
+            chests: 3,
+            keys: {
+                mobs: 1,
+                pots: 1
+            },
             min: 1,
             max: 2
         },
         z3boss1: {
             name: "Desert Palace",
             boss: "Lanmolas",
+            ditems: ["bigkey","compass","map"],
+            chests: 2,
+            keys: {
+                chests: 1,
+                pots: 3
+            },
             min: 1,
             max: 2
         },
         z3boss2: {
             name: "Tower of Hera",
             boss: "Moldorm",
+            ditems: ["bigkey","compass","map"],
+            chests: 2,
+            keys: {
+                chests: 1
+            },
             min: 1,
             max: 2
         },
         z3boss3: {
             name: "Palace of Darkness",
             boss: "Helmasaur King",
+            ditems: ["bigkey","compass","map"],
+            chests: 5,
+            keys: {
+                chests: 6
+            },
             min: 1,
             max: 2
         },
         z3boss4: {
             name: "Swamp Palace",
             boss: "Arrghus",
+            ditems: ["bigkey","compass","map"],
+            chests: 6,
+            keys: {
+                chests: 1,
+                pots: 4
+            },
             min: 1,
             max: 2
         },
         z3boss5: {
             name: "Skull Woods",
             boss: "Mothula",
+            ditems: ["bigkey","compass","map"],
+            chests: 2,
+            keys: {
+                chests: 3,
+                mobs: 1,
+                pots: 1
+            },
             min: 1,
             max: 2
         },
         z3boss6: {
             name: "Thieves' Town",
             boss: "Blind",
+            ditems: ["bigkey","compass","map"],
+            chests: 4,
+            keys: {
+                chests: 1,
+                pots: 2
+            },
             min: 1,
             max: 2
         },
         z3boss7: {
             name: "Ice Palace",
             boss: "Kholdstare",
+            ditems: ["bigkey","compass","map"],
+            chests: 3,
+            keys: {
+                chests: 2,
+                mobs: 2,
+                pots: 2
+            },
             min: 1,
             max: 2
         },
         z3boss8: {
             name: "Misery Mire",
             boss: "Vitreous",
+            ditems: ["bigkey","compass","map"],
+            chests: 2,
+            keys: {
+                chests: 3,
+                mobs: 1,
+                pots: 2
+            },
             min: 1,
             max: 2
         },
         z3boss9: {
             name: "Turtle Rock",
             boss: "Trinexx",
+            ditems: ["bigkey","compass","map"],
+            chests: 5,
+            keys: {
+                chests: 4,
+                mobs: 2
+            },
             min: 1,
             max: 2
         },
         z3boss10: {
             name: "Ganon's Tower",
             boss: "Agahnim II",
+            ditems: ["bigkey","compass","map"],
+            chests: 20,
+            keys: {
+                chests: 4,
+                mobs: 1,
+                pots: 3
+            },
             min: 1,
             max: 2
         },
         z3boss11: {
             name: "Hyrule Castle Tower",
             boss: "Agahnim",
+            ditems: [],
+            chests: 2,
+            keys: {
+                chests: 2,
+                pots: 2
+            },
             min: 1,
             max: 2
         },
         z3boss12: {
             name: "Pyramid of Power",
             boss: "Ganon",
+            ditems: [],
+            chests: 0,
+            keys: {},
             min: 1,
             max: 2
-        }
+        },
+        ganonz3: {
+            name: "Ganon of Legend",
+            boss: "Ganon",
+            min: 0,
+            max: 1
+        },
+        mbm3: {
+            name: "Neo Mother Brain",
+            boss: "Mother Brain",
+            min: 0,
+            max: 1
+        },
+        ganonz1: {
+            name: "Ancient Ganon",
+            boss: "Ganon",
+            min: 0,
+            max: 1
+        },
+        mbm1: {
+            name: "Proto Mother Brain",
+            boss: "Mother Brain",
+            min: 0,
+            max: 1
+        },
     },
     regions: {
         // z3dungeons: ["main"],
@@ -264,27 +365,13 @@ manifests[g] = {
     defaultSettings: {
         mapState:   "open",
         mapOHKO:    false,
-        mapSwords:  true,
+        mapSwords:  false,
+        mOrien:     "Vertical",
         mPos:       "Side",
         mZoom:      80,
         showChests: true,
         showPrizes: true,
         showMedals: true,
-    },
-    dungeonchestsInit:  {
-         0:  3, // Eastern Palace
-         1:  2, // Desert Palace
-         2:  2, // Tower of Hera
-         3:  5, // Palace of Darkness
-         4:  6, // Swamp Palace
-         5:  2, // Skull Woods
-         6:  4, // Thieves' Town
-         7:  3, // Ice Palace
-         8:  2, // Misery Mire
-         9:  5, // Turtle Rock
-        10: 20, // Ganon's Tower
-        11:  0, // Hyrule Castle Tower
-        12:  0  // Pyramid of Power
     },
     dungeonBeatenInit:  Array(bosses).fill(false),
     prizesInit:         Array(bosses).fill(0),
