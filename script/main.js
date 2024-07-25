@@ -1600,11 +1600,13 @@ function confirmSaveConfigToFirebase() {
     }
 }
 
+const vueMajor = parseInt(Vue.version);
+console.log(`Vue${vueMajor}: ${Vue.version}`);
+
 Vue.component('tracker-table', {
   template: '#tracker-table',
   props: [
     'itemRows',
-    'trackerData',
     'trackerData'
   ],
   computed: {
@@ -1612,6 +1614,9 @@ Vue.component('tracker-table', {
       return !this.itemRows.reduce ? 0 : this.itemRows.map(function(i) {return i.length}).reduce(function(a,b) {
           return Math.max(a, b);
       });
+    },
+    inEditMode: function() {
+      return this.trackerData.editMode;
     }
   },
   methods: {
@@ -1639,11 +1644,7 @@ Vue.component('tracker-table', {
 Vue.component('tracker-cell', {
   template: '#tracker-cell',
   props: [
-    'itemValue',
     'itemName',
-    'columnIndex',
-    'rowIndex',
-    'trackerData',
     'trackerData'
   ],
   computed: {
@@ -1675,7 +1676,7 @@ Vue.component('tracker-cell', {
       return null;
     },
     itemLabel: function() {
-        return fix_itemlabel(this.itemName);
+      return fix_itemlabel(this.itemName);
     },
     textCounter: function() {
       var itemValue = this.trackerData[selectedGame].items[this.itemName];

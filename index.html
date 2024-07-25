@@ -6,7 +6,10 @@
         <link rel="stylesheet" href="css/global.css" type="text/css">
         <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
         <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=" />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.16/vue.min.js"></script>
+        <script src="script/vue/2.7.16/vue.min.js"></script>
+        <!-- <script src="script/vue/3.4.34/vue.global.prod.js"></script> -->
+        <!-- <script src="https://unpkg.com/vue@2/dist/vue.min.js"></script> -->
+        <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script> -->
 
         <script src="script/loader/lazyload.js"></script>
         <script src="script/manifest.js"></script>
@@ -174,12 +177,12 @@
                     <tracker-cell v-for="(item, itemColumnIndex) in itemRow" :itemName="item" :itemValue="itemFor(item)"
                     :column-index="itemColumnIndex" :row-index="itemRowIndex"
                     :tracker-data="trackerData" :tracker-options="trackerData" :key="itemColumnIndex + '-' + itemRowIndex"></tracker-cell>
-                    <button v-if="trackerData && trackerData[selectedGame].editMode" @click.prevent.stop="removeItem(itemRowIndex)"
+                    <button v-if="inEditMode" @click.prevent.stop="removeItem(itemRowIndex)"
                         :style="{backgroundColor: 'red', color: 'white', verticalAlign: 'top', marginTop: '20px'}">-</button>
-                    <button v-if="trackerData && trackerData[selectedGame].editMode" @click.prevent.stop="addItem(itemRowIndex)"
+                    <button v-if="inEditMode" @click.prevent.stop="addItem(itemRowIndex)"
                         :style="{backgroundColor: 'green', color: 'white', verticalAlign: 'top', marginTop: '20px'}">+</button>
                 </div>
-                <button v-if="trackerData && trackerData[selectedGame].editMode" @click.prevent.stop="addRow">Add row</button>
+                <button v-if="inEditMode" @click.prevent.stop="addRow">Add row</button>
             </div>
         </script>
 
