@@ -68,16 +68,16 @@ for(let gameID of megaManifest["gameSets"][gameSet]["games"]) {
     gameItems[gameID] = Object.keys(manifests[gameID]["items"]);
     prizesInit[gameID] = manifests[gameID]["prizesInit"];
 }
-console.log(
-    {
-        defaultGrid: defaultItemGrid,
-        dungeonBeaten: dungeonbeatenInit,
-        dungeonChests: dungeonchestsInit,
-        medallions: medallionsInit,
-        items: gameItems,
-        prizes: prizesInit
-    }
-);
+// console.log(
+//     {
+//         defaultGrid: defaultItemGrid,
+//         dungeonBeaten: dungeonbeatenInit,
+//         dungeonChests: dungeonchestsInit,
+//         medallions: medallionsInit,
+//         items: gameItems,
+//         prizes: prizesInit
+//     }
+// );
 
 var itemsInit = {
     blank: false,

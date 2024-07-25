@@ -134,11 +134,9 @@ manifests[g] = {
         m3hyruleportals:    ["main"],
     },
     defaultSettings: {
-        chestSkin:  "lights",
         mapLogic:   "casualLogic",
         mPos:       "Above",
-        mZoom:      100,
-        showPrizes: true
+        mZoom:      100
     },
     dungeonBeatenInit:  Array(bosses).fill(false),
     prizesInit:         Array(bosses).fill(4)

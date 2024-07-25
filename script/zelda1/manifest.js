@@ -192,9 +192,7 @@ manifests[g] = {
     },
     defaultSettings: {
         mapLogic:   "minorGlitches",
-        mPos:       "Above",
-        showChests: true,
-        showPrizes: true
+        mPos:       "Above"
     },
     dungeonBeatenInit:  Array(bosses).fill(false),
     prizesInit:         Array(bosses).fill(5)

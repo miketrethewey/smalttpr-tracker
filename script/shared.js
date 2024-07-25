@@ -23,14 +23,6 @@ function getParameterByName(name, url, defaultVal) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-// Extend an object
-function extend(obj, src) {
-    for (var key in src) {
-        if (src.hasOwnProperty(key)) obj[key] = src[key];
-    }
-    return obj;
-}
-
 var manifests = []; // Hold collected game manifests
 var g = "";         // Reusable GameID
 var bosses = 0;     // Number of Bosses
@@ -56,6 +48,14 @@ var questid = getParameterByName("questid",window.location,1);
 
 // FIXME: Unused?
 var authAttempted = false;
+
+// Extend an object
+function extend(obj, src) {
+    for (var key in src) {
+        if (src.hasOwnProperty(key)) obj[key] = src[key];
+    }
+    return obj;
+}
 
 function destroyFirebase() {
     // do nothing

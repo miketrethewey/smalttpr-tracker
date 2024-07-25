@@ -61,8 +61,7 @@ manifests[g] = {
     },
     defaultSettings: {
         mapLogic:   "casualLogic",
-        mPos:       "Above",
-        showPrizes: true
+        mPos:       "Above"
     },
     dungeonchestsInit:  {},
     dungeonBeatenInit:  Array(bosses).fill(false),

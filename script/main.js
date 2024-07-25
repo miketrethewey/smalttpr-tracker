@@ -1,3 +1,4 @@
+var cookielock = false;
 var cookieDefault = {};
 var chestsopenedInit = {};
 var chestsimportantInit = {};
@@ -61,8 +62,8 @@ let defaultData = {
     medallions: medallionsInit[selectedGame],
     prizes: prizesInit[selectedGame]
 };
-for(let key in defaultData) {
-    let val = defaultData[key];
+// console.log(`Setting ThisGame [${selectedGame}] Default Data to "Cookie" and "RAM"`);
+for(let [key,val] of Object.entries(defaultData)) {
     if(cookieDefault[selectedGame][key] === undefined) {
         cookieDefault[selectedGame][key] = val;
     }
@@ -71,17 +72,48 @@ for(let key in defaultData) {
     }
 }
 
-let defaultBoth = {
+// FIXME: Hack
+let defaultOptions = {
+    zelda3: {
+        mapLogic: (zeldaMode == "regions") ? "minorGlitches" : "glitchless"
+    },
+    averge1: {
+        mapLogic:   "glitchless",
+        mPos:       "Above",
+        mZoom:      100
+    }
+};
+// console.log(`Hacking Z3 and AVerge1 Settings into "Cookie" and "RAM"`);
+// console.log(`Adding Settings from ${selectedGame} Manifest into "Cookie" and "RAM"`);
+for(let gameName of megaManifest["gameSets"][gameSet]["games"]) {
+    if(!(gameName in defaultOptions)) {
+        defaultOptions[gameName] = [];
+    }
+    defaultOptions[gameName] = extend(
+        defaultOptions[gameName],
+        manifests[gameName]["defaultSettings"]
+    );
+    cookieDefault[gameName].items = defaultItemGrid[gameName];
+    for(let k in defaultOptions[gameName]) {
+        if(cookieDefault[gameName][k] === undefined) {
+            cookieDefault[gameName][k] = defaultOptions[gameName][k];
+        }
+        if(trackerData[gameName][k] === undefined) {
+            trackerData[gameName][k] = defaultOptions[gameName][k];
+        }
+    }
+}
+
+let defaultSettings = {
     gotprizes:  [0,0,0,0],
-    iZoom:      100,
-    map:        "Below",
-    mOrien:     "Vertical",
-    showLabels: true,
     editMode:   false,
     selected:   {}
 };
-for(let key in defaultBoth) {
-    let val = defaultBoth[key];
+for(let [key,sData] of Object.entries(cookieKeys)) {
+    defaultSettings[key] = sData["default"] !== undefined ? sData["default"] : false;
+}
+// console.log(`Setting Global Default Settings to "Cookie" and "RAM"`);
+for(let [key,val] of Object.entries(defaultSettings)) {
     for(let gameName of megaManifest["gameSets"][gameSet]["games"]) {
         if(cookieDefault[gameName][key] === undefined) {
             cookieDefault[gameName][key] = val;
@@ -91,8 +123,12 @@ for(let key in defaultBoth) {
         }
     }
 }
-
-// console.log(trackerData);
+// console.log(
+//     {
+//         cookieDefault: cookieDefault[selectedGame],
+//         trackerData: trackerData[selectedGame]
+//     }
+// );
 
 function isCounter(key) {
     let searches = [
@@ -122,9 +158,12 @@ function isAmmo(key) {
 }
 
 function setCookie(obj) {
+    console.log("ATTEMPTING TO TOSS COOKIE IN STORAGE");
     try {
+        console.log(obj);
         window.localStorage.setItem(gameSet, JSON.stringify(obj));
     } catch (e) {
+        console.log("FAILED TO TOSS COOKIE IN STORAGE");
         // do nothing
     }
 }
@@ -146,60 +185,6 @@ function getCookie() {
     return JSON.parse(str);
 }
 
-var cookiekeys = [
-    'ts',               // global
-    'itemValues',
-    'gameName',         // both games
-    'chestsImportant',
-    'chestsOpened',
-    'chestsPortal',
-    'items',
-    'iZoom',
-    'map',
-    'mOrien',
-    'mPos',
-    'label',
-    'mapLogic',
-    'mPos',
-    'mZoom',
-    "nonVanilla",
-    'showLabels',
-    'mapOHKO',          // zelda3-only
-    'mapState',
-    'mapSwords',
-    'showChests',
-    'showMedals',
-    'showPrizes',
-    'chestSkin'         // metroid3-only
-];
-
-let defaultOptions = {
-    zelda3: {
-        mapLogic: (zeldaMode == "regions") ? "minorGlitches" : "glitchless"
-    },
-    averge1: {
-        mapLogic:   "glitchless",
-        mPos:       "Above",
-        mZoom:      100
-    }
-};
-for(let gameName of megaManifest["gameSets"][gameSet]["games"]) {
-    if(!(gameName in defaultOptions)) {
-        defaultOptions[gameName] = [];
-    }
-    defaultOptions[gameName] = extend(defaultOptions[gameName],manifests[gameName]["defaultSettings"]);
-    cookieDefault[gameName].items = defaultItemGrid[gameName];
-    for(let k in defaultOptions[gameName]) {
-        if(cookieDefault[gameName][k] === undefined) {
-            cookieDefault[gameName][k] = defaultOptions[gameName][k];
-        }
-        if(trackerData[gameName][k] === undefined) {
-            trackerData[gameName][k] = defaultOptions[gameName][k];
-        }
-    }
-}
-
-var cookielock = false;
 function loadCookie() {
     // console.log("ATTEMPTING TO LOAD COOKIE");
     if (cookielock) {
@@ -217,78 +202,47 @@ function isNumeric(n) {
 }
 
 function setConfigObject(configobj) {
-    //initGridRow(JSON.parse(JSON.stringify(configobj.items)));
-    //while(itemLayout.length > 0) {itemLayout.length.pop();}
-    //itemLayout = configobj.items;
-    //Array.prototype.push.apply(itemLayout, configobj.items);
     window.vm.itemRows = configobj[selectedGame].items;
-    // console.log(
-    //     "SET CONFIG OBJ",
-    //     {
-    //         configobj: configobj[selectedGame].items,
-    //         window: window.vm.itemRows
-    //     }
-    // );
 
-    for(let [eleName, cookieKey] of Object.entries({
-        "showmap":          "map",          // Map Enabled?
-        "itemdivsize":      "iZoom",        // Inventory Scale
-        "mapdivsize":       "mZoom",        // Map Scale
-        "maporientation":   "mOrien",       // Map Orientation (Horizontal, Vertical)
-        "mapposition":      "mPos",         // Map Position (Above, Below, Side)
-        "mapstate":         "mapState",     // Map State (Standard, Open)
-        "swordless":        "mapSwords",    // Swordless?
-        "ohko":             "mapOHKO",      // OHKO?
-        "maplogic":         "mapLogic",     // Map Logic
-        "nonvanilla":       "nonVanilla",   // Non-Vanilla Slots?
-        "chestskin":        "chestSkin",    // Chest Skin (Lights, No Lights, Nothing)
-        "showchest":        "showChests",   // Show Chests on Dungeon Squares?
-        "showcrystal":      "showPrizes",   // Show Prizes on Dungeon Squares?
-        "showmedallion":    "showMedals",   // Show Medallions on Dungeon Squares?
-        "showlabel":        "showLabels"    // Show Labels on Dungeon/BOss Squares?
-    })) {
+    for(let [eleName, sData] of Object.entries(cookieKeys)) {
+        let domName = sData["domName"];
+        cookieKey = sData["cookieKey"];
         if(!(cookieKey in configobj[selectedGame])) {
             // console.log("NO:",selectedGame,cookieKey);
             continue;
         }
-        let eles = document.getElementsByName(eleName);
+        let eles = document.getElementsByName(domName);
         let eleNum = 0;
-        let isRadio = false;
         if(eles) {
             // console.log("Have Eles:",eleName);
-            let vals = {
-                maporientation: ["Horizontal","Vertical"],
-                mapposition:    ["Above","Below","Side"],
-                mapstate:       ["standard","open","inverted"],
-                maplogic:       ["glitchless","minorGlitches","owGlitches","majorGlitches","casualLogic","tourneyLogic"],
-                chestskin:      ["lights","nolights","nothing"]
-            };
-            if(Object.keys(vals).indexOf(eleName) > -1) {
-                cookieVal = configobj[selectedGame][cookieKey];
-                let test = -1;
-                if(isNumeric(cookieVal)) {
-                    test = cookieVal;
-                } else {
-                    if(vals[eleName].indexOf(cookieVal) > -1) {
-                        test = vals[eleName].indexOf(cookieVal);
-                    }
+            let vals = [];
+            for(let ele of eles) {
+                if(ele.type == "radio") {
+                    vals.push(ele.value);
                 }
-                if(test > -1) {
-                    // console.log("Radio Selection");
-                    eleNum = test;
-                    isRadio = true;
-                } else {
-                    // console.log("Failed Radio Test:",cookieVal);
-                }
+            }
+            cookieVal = configobj[selectedGame][cookieKey];
+            if(sData["type"] != "calculated") {
+                // console.log(`Setting in HTML Form: ${cookieKey} to ${cookieVal}`)
+            }
+            let isRadio = eles.length > 1;
+            if(vals.indexOf(cookieVal) > -1) {
+                test = vals.indexOf(cookieVal);
+            }
+            if(isRadio) {
+                // console.log("> Radio Selection");
+                eleNum = test;
+            } else {
+                // console.log("> Failed Radio Test:",cookieVal);
             }
             if(eles[eleNum]) {
                 let ele = eles[eleNum];
                 if(!isRadio) {
-                    // console.log("Toggling Check");
                     ele.checked = !!configobj[selectedGame][cookieKey];
+                    // console.log(` > ${domName}`,ele.checked);
                     ele.onchange();
                 } else {
-                    // console.log("Clicking Radio");
+                    // console.log(` > ${domName}`,ele.value);
                     ele.click();
                 }
             }
@@ -323,7 +277,7 @@ function saveCookie(onInit = false) {
         console.log("ATTEMPTING TO LOAD INITIAL COOKIE");
         cookieobj = getConfigObjectFromCookie(onInit);
     } else {
-        // console.log("ATTEMPTING TO GET CONFIG OBJ");
+        console.log("ATTEMPTING TO BUILD COOKIE FROM CONFIG OBJ");
         cookieobj = getConfigObject();
         setCookie(cookieobj);
     }
@@ -348,13 +302,24 @@ function resetCookie() {
 
 function getConfigObjectFromCookie(getAllKeys = true) {
     configobj = getCookie();
-    var globalKeys = ["ts","itemValues"];
+    var globalKeys = [
+        "ts",
+        "gameName",
+        "itemValues",
+        "chestsImportant",
+        "chestsOpened",
+        "chestsPortal"
+    ];
 
-    cookiekeys.forEach(function (key) {
+    for(let [key,keyData] of Object.entries(cookieKeys)) {
+        if(keyData["type"] == "calculated" && globalKeys.indexOf(key) > -1) {
+            continue;
+        }
         for(let gameName of megaManifest["gameSets"][gameSet]["games"]) {
             if(configobj[gameName] && configobj[gameName][key] === undefined) {
                 if(globalKeys.indexOf(key) < 0) {
                     if(cookieDefault[gameName][key] !== undefined) {
+                        // console.log(`Defaulting: ${gameName}/${key} to ${cookieDefault[gameName][key]}`)
                         configobj[gameName][key] = cookieDefault[gameName][key];
                     }
                 } else if (!getAllKeys) {
@@ -362,7 +327,7 @@ function getConfigObjectFromCookie(getAllKeys = true) {
                 }
             }
         }
-    });
+    }
 
     if(getAllKeys) {
         // Add any more fields you need to populate from local storage here.
@@ -382,70 +347,9 @@ function getConfigObject() {
 
     configobj[selectedGame] = {};
     configobj[selectedGame].gameName = selectedGame;
-    let configSwitches = {
-        "showmap": {
-            "cookieKey": "map",
-            "type": "toggle"
-        },
-        "itemdivsize": {
-            "cookieKey": "iZoom",
-            "type": "value"
-        },
-        "mapdivsize": {
-            "cookieKey": "mZoom",
-            "type": "value"
-        },
-        "maporientation": {
-            "cookieKey": "mOrien",
-            "type": "option"
-        },
-        "mapposition": {
-            "cookieKey": "mPos",
-            "type": "option"
-        },
-        "mapstate": {
-            "cookieKey": "mapState",
-            "type": "option"
-        },
-        "swordless": {
-            "cookieKey": "mapSwords",
-            "type": "toggle"
-        },
-        "ohko": {
-            "cookieKey": "mapOHKO",
-            "type": "toggle"
-        },
-        "maplogic": {
-            "cookieKey": "mapLogic",
-            "type": "option"
-        },
-        "nonvanilla": {
-            "cookieKey": "nonVanilla",
-            "type": "toggle"
-        },
-        "chestskin": {
-            "cookieKey": "chestSkin",
-            "type": "option"
-        },
-        "showchest": {
-            "cookieKey": "showChests",
-            "type": "toggle"
-        },
-        "showcrystal": {
-            "cookieKey": "showPrizes",
-            "type": "toggle"
-        },
-        "showmedallion": {
-            "cookieKey": "showMedals",
-            "type": "toggle"
-        },
-        "showlabel": {
-            "cookieKey": "showLabels",
-            "type": "toggle"
-        }
-    };
-    for(let [eleName, sData] of Object.entries(configSwitches)) {
-        cookieKey = sData["cookieKey"];
+
+    for(let [cookieKey, sData] of Object.entries(cookieKeys)) {
+        let eleName = sData["domName"] ? sData["domName"] : cookieKey;
         if(["toggle","value"].indexOf(sData["type"]) > -1) {
             let eles = document.getElementsByName(eleName);
             if(eles) {
@@ -459,15 +363,21 @@ function getConfigObject() {
                 }
             }
         } else if(sData["type"] == "option") {
-            let eles = document.querySelector("input[name=\"" + eleName + "\"]:checked");
+            let eles = document.querySelectorAll("input[name=\"" + eleName + "\"]:checked");
             if(eles) {
-                let ele = eles;
+                let ele = eles[0];
                 if(ele) {
                     configobj[selectedGame][cookieKey] = document.querySelector("input[name=\"" + eleName + "\"]:checked").value;
                 }
             }
         }
+        // console.log(
+        //     sData["type"],
+        //     eleName,
+        //     sData["type"] != "calculated" ? configobj[selectedGame][cookieKey] : ""
+        // );
     }
+    // console.log("");
 
     configobj[selectedGame].items = window.vm.itemRows;
     // console.log(
@@ -480,7 +390,13 @@ function getConfigObject() {
 
     configobj.itemValues = trackerData[selectedGame].items;
 
-    let savedProperties = ["chestsopened","chestsimportant","chestsportal","dungeonsbeaten","dungeonchests"];
+    let savedProperties = [
+        "chestsopened",
+        "chestsimportant",
+        "chestsportal",
+        "dungeonsbeaten",
+        "dungeonchests"
+    ];
 
     for(let key in savedProperties) {
         key = savedProperties[key];
@@ -585,13 +501,13 @@ function chestClass(x) {
         // className += "portal-" + selectedGame + " ";
         className += "warp ";
         className += "warp-" + selectedGame + " ";
-        if(!document.getElementById("mapWarps").checked) {
+        if(!document.getElementById("showwarp").checked) {
             className += "hidden ";
         }
     } else if(chest.isPortal) {
         className += "portal ";
         className += "portal-" + manifests[selectedGame]["altGame"][0] + " ";
-        if(!document.getElementById("mapPortals").checked) {
+        if(!document.getElementById("showportal").checked) {
             className += "hidden ";
         }
     }
@@ -867,13 +783,6 @@ function showMedallion(sender) {
 }
 
 function showLabel(sender) {
-    if([
-        "zelda1",
-        "zelda3",
-        "metroid1",
-        "metroid3"
-    ].indexOf(selectedGame) == -1) { return; }
-
     trackerData[selectedGame].showLabels = sender.checked;
     refreshMap();
     saveCookie();
@@ -890,6 +799,7 @@ function showRegions(sender) {
         document.getElementById("mapoverlay").classList.remove("on");
         document.getElementById("mapoverlay").classList.add("off");
     }
+    refreshMap();
     saveCookie();
 }
 
@@ -907,6 +817,7 @@ function showWarps(sender) {
             userItem.classList.add("hidden");
         });
     }
+    refreshMap();
     saveCookie();
 }
 
@@ -922,17 +833,22 @@ function showPortals(sender) {
             userItem.classList.add("hidden");
         });
     }
-    let altGame = manifests[selectedGame]["altGame"][0];
-    let items = document.querySelectorAll(".item-" + altGame);
-    if(sender.checked) {
-        items.forEach(function(userItem) {
-            userItem.classList.remove("hidden");
-        });
-    } else {
-        items.forEach(function(userItem) {
-            userItem.classList.add("hidden");
-        });
+
+    let altGames = megaManifest["gameSets"][selectedGameSet]["games"];
+    for(let altGame of altGames) {
+        if(altGame == selectedGame) { continue; }
+        let items = document.querySelectorAll(".item-" + altGame);
+        if(sender.checked) {
+            items.forEach(function(userItem) {
+                userItem.classList.remove("hidden");
+            });
+        } else {
+            items.forEach(function(userItem) {
+                userItem.classList.add("hidden");
+            });
+        }
     }
+    refreshMap();
     saveCookie();
 }
 
@@ -1087,10 +1003,10 @@ function showNonVanilla(sender) {
 
 function showSettings(sender) {
     if (trackerData[selectedGame].editMode) {
-        trackerData[selectedGame].showChests = document.getElementsByName('showchest')[0].checked;
-        trackerData[selectedGame].showPrizes = document.getElementsByName('showcrystal')[0].checked;
-        trackerData[selectedGame].showMedals = document.getElementsByName('showmedallion')[0].checked;
-        trackerData[selectedGame].showLabels = document.getElementsByName('showlabel')[0].checked;
+        // trackerData[selectedGame].showChests = document.getElementsByName('showchest')[0].checked;
+        // trackerData[selectedGame].showPrizes = document.getElementsByName('showcrystal')[0].checked;
+        // trackerData[selectedGame].showMedals = document.getElementsByName('showmedallion')[0].checked;
+        // trackerData[selectedGame].showLabels = document.getElementsByName('showlabel')[0].checked;
         trackerData[selectedGame].editMode = false;
         showTracker('mapdiv', document.getElementsByName('showmap')[0]);
         document.getElementById('itemconfig').style.display = 'none';
@@ -1119,10 +1035,10 @@ function showTracker(target, sender) {
 }
 
 function EditMode() {
-    trackerData[selectedGame].showChests = false;
-    trackerData[selectedGame].showPrizes = false;
-    trackerData[selectedGame].showMedals = false;
-    trackerData[selectedGame].showLabels = false;
+    // trackerData[selectedGame].showChests = false;
+    // trackerData[selectedGame].showPrizes = false;
+    // trackerData[selectedGame].showMedals = false;
+    // trackerData[selectedGame].showLabels = false;
     trackerData[selectedGame].editMode = true;
     showTracker('mapdiv', {checked:false});
     document.getElementById('settings').style.display = 'none';
@@ -1806,7 +1722,11 @@ Vue.component('tracker-cell', {
     //         }
     //       );
     //   }
-      if(this.bossNum && this.trackerData[selectedGame] && this.trackerData[selectedGame].showChests) {
+      if(
+        this.bossNum &&
+        this.trackerData[selectedGame] &&
+        this.trackerData[selectedGame].showChests
+      ) {
         return "url(" + build_img_url("chest" + this.trackerData[selectedGame].dungeonchests[this.bossNum]) + ")";
       }
       return null;

@@ -363,15 +363,10 @@ manifests[g] = {
         // z3zebes:    ["z3-m3"],
     },
     defaultSettings: {
-        mapState:   "open",
-        mapOHKO:    false,
-        mapSwords:  false,
         mOrien:     "Vertical",
         mPos:       "Side",
-        mZoom:      80,
-        showChests: true,
-        showPrizes: true,
-        showMedals: true,
+        // mZoom:      80,
+        showMedals: true
     },
     dungeonBeatenInit:  Array(bosses).fill(false),
     prizesInit:         Array(bosses).fill(0),
