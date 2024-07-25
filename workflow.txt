@@ -5,3 +5,4 @@ index.html
     Nickname of Combo Rando
     Games included in Combo Rando
   script/shared.js          // Common functions
+  script/includes.js        // LazyLoad a bunch of files

@@ -49,6 +49,7 @@ function fix_region(str) {
 
 var scripts = [];
 
+// JS: Get manifests for this gameSet
 var selectedGameSet = "";
 for(let [setID, gameSet] of Object.entries(megaManifest["gameSets"])) {
     if(gameSet["games"].indexOf(selectedGame) > -1) {
@@ -60,14 +61,17 @@ for(let [setID, gameSet] of Object.entries(megaManifest["gameSets"])) {
 }
 gameSet = selectedGameSet;
 
+// JS: Get global items
 scripts.push("script/items.js");
+// JS: Get global access
 scripts.push("script/shared-access.js");
 
-var sheets = [
-];
+var sheets = [];
 
+// JS: Get Boss prototype
 scripts.push("script/classes/Boss.js");
 
+// FIXME: Find a way to get from manifest
 var bossDefns = {
     zelda3: [
         "ArmosKnights",
@@ -93,6 +97,7 @@ var bossDefns = {
     ],
 };
 
+// JS: Get Boss defns
 for(var gameName in bossDefns) {
     list = bossDefns[gameName];
     for(var boss in list) {
@@ -101,40 +106,45 @@ for(var gameName in bossDefns) {
     }
 }
 
+// JS: Get Location prototype
 scripts.push("script/classes/Location.js");
 scripts.push("script/classes/LocationCollection.js");
+// JS: Get Region prototype
 scripts.push("script/classes/Region.js");
 
+// JS: Get NES Region prototype
 if(gameSet == "lozmx" || gameSet == "quad") {
     scripts.push("script/classes/Region/TLoZ.js");
     scripts.push("script/classes/Region/Metroid.js");
 }
+// JS: Get SNES Region prototype
 if(gameSet == "smalttpr" || gameSet == "quad") {
     scripts.push("script/classes/Region/ALttP.js");
     scripts.push("script/classes/Region/SuperMetroid.js");
 }
+// JS: Get Averge1 Region prototype
 if(gameSet == "averge1") {
     scripts.push("script/classes/Region/AxiomVerge.js");
 }
 
-// Add Game CSS
+// CSS: Add Game CSS
 let universe = selectedGame.substr(0,selectedGame.length - 1);
 sheets.push("css/" + universe + '/' + universe.substr(0,1) + selectedGame.substr(-1) + '/' + universe + selectedGame.substr(-1) + ".css");
 
-// Add NotUniverse CSS
+// CSS: Add NotUniverse CSS
 for(let u of ["zelda","metroid"]) {
     if(universe != u) {
         sheets.push(`css/${u}/not${u}.css`);
     }
 }
-// Add NotCombo CSS
+// CSS: Add NotCombo CSS
 for(let g of ["lozmx","smalttpr"]) {
     if(gameSet != g && gameSet != "quad") {
         sheets.push(`css/gamesets/not${g}.css`)
     }
 }
 
-// Add NotGame CSS
+// CSS: Add NotGame CSS
 for(let g of ["zelda1","metroid1","zelda3","metroid3"]) {
     if(selectedGame != g) {
         let u = g.substring(0,g.length - 1);
@@ -142,7 +152,7 @@ for(let g of ["zelda1","metroid1","zelda3","metroid3"]) {
     }
 }
 
-// Add Universe CSS
+// CSS: Add Universe CSS
 if(universe == "zelda") {
     sheets.push("css/zelda/zelda.css");
 }
@@ -150,10 +160,11 @@ if(universe == "metroid") {
     sheets.push("css/metroid/metroid.css");
 }
 
-sheets.push("css/portals.css"); // Portals
-sheets.push("css/wrapup.css");  // Wrap-Up
-scripts.push("script/classes/init.js");
+sheets.push("css/portals.css");         // CSS: Portals
+sheets.push("css/wrapup.css");          // CSS: Wrap-Up
+scripts.push("script/classes/init.js"); // JS:  Initialize classes
 
+// FIXME: Find a way to get from manifest
 var regionNames = {
     zelda1: {
         overworld: [
@@ -259,6 +270,7 @@ if(zeldaMode == "regions") {
     }
 }
 
+// JS: Get Region defns
 for(var gameName in regionNames) {
     if(gameName == selectedGame) {
         game = regionNames[gameName];
@@ -271,6 +283,7 @@ for(var gameName in regionNames) {
                 if(!(gameName == "zelda3" && zeldaMode == "oldstyle")) {
                     url += "script/classes/Region/";
 
+                    // FIXME: Find a way to get from manifest
                     let dirs = {
                         zelda3:     "ALttP",
                         metroid3:   "SuperMetroid",
@@ -292,15 +305,16 @@ for(var gameName in regionNames) {
     }
 }
 
-scripts.push("script/vue/vue-2.5.16-min.js");
-scripts.push("script/options.js");
-scripts.push("script/main.js");
+// scripts.push("script/vue/vue-2.5.16-min.js");   // JS: Vue
+scripts.push("script/options.js");              // JS: Switches
+scripts.push("script/main.js");                 // JS: Main App
 
 // console.log({sheets:sheets,scripts:scripts});
 
-LazyLoad.css(sheets, function () {
-});
+// CSS: Load
+LazyLoad.css(sheets, function () {});
 
+// JS: Load
 LazyLoad.js(scripts, function () {
     init(initClasses,selectedGame);
     init(initTracker,selectedGame);

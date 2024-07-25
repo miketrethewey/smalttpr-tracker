@@ -7,10 +7,11 @@ function initClasses(useGame) {
         }
         if(gameName == useGame) {
             game = regionNames[gameName];
-            var i = 1;
+            // Cycle through regions
             for(var regionName in game) {
                 region = game[regionName];
                 for(var segment in region) {
+                    // Instantiate region
                     var segmentName = region[segment];
                     var regionClassName = fix_region(regionName) + fix_region(segmentName);
                     var regionObject = eval("new " + regionClassName + "()");
@@ -23,16 +24,19 @@ function initClasses(useGame) {
                         regionObject.initTournament();
                     }
 
+                    // Save region object
                     regionObjects[regionClassName] = regionObject;
 
                     var total = 0;
 
+                    // Cycle through locations
                     for(var location in regionObject.locations) {
                         location = regionObject.locations[location];
 
                         var output = "";
                         output += location.type + ": ";
 
+                        // Create location element
                         var d = document.createElement("div");
                         d.innerHTML = location.name;
                         if(location.type == "Event") {
@@ -48,6 +52,7 @@ function initClasses(useGame) {
                             type: location.type,
                             region: location.region,
                         };
+                        // Zelda has Glitch levels
                         if(universe == "zelda") {
                             props.canAccess = {
                                 glitchless: location.glitchless,
@@ -56,12 +61,14 @@ function initClasses(useGame) {
                                 majorGlitches: location.majorGlitches
                             };
                         }
+                        // Metroid has Logic levels
                         if(universe == "metroid") {
                             props.canAccess = {
                                 casualLogic: location.casualLogic,
                                 tourneyLogic: location.tourneyLogic
                             };
                         }
+                        // Load mini icons
                         if(location.equipment) {
                             var regex = /%%([\w]+)%%/g;
                             var equip = location.equipment;
@@ -77,6 +84,7 @@ function initClasses(useGame) {
                             regionObjects[regionClassName] = regionObject;
                         }
 
+                        // Special case for Event type location
                         if(location.type == "Event") {                            // Boss/Dungeon
                             var label = location.name.split('-')[0].split(' ');
                             label = label.map(x => {
@@ -92,6 +100,7 @@ function initClasses(useGame) {
                                 label = location.name.substring(location.name.indexOf("The ") + ("The ").length).split('');
                             }
 
+                            // Create a Dungeon location
                             var dungeon = {
                                 label: label.join(''),
                                 isBeatable: function() {
@@ -105,21 +114,16 @@ function initClasses(useGame) {
                                         // Minor Glitches
                                         let regionAccess = regionObjects[this.region].canEnter.minorGlitches();
                                         let localAccess = regionObjects[this.region].canComplete.minorGlitches();
+                                        let minorAvailability = "unavailable";
                                         if(regionAccess && localAccess) {
-                                            if(typeof regionAccess == "string" || typeof localAccess == "string") {
-                                                if(typeof localAccess == "string") {
-                                                    availability.minorGlitches = localAccess;
-                                                } else if(typeof regionAccess == "string") {
-                                                    availability.minorGlitches = regionAccess;
-                                                } else {
-                                                    availability.minorGlitches = "available";
-                                                }
-                                            } else {
-                                                availability.minorGlitches = "available";
+                                            minorAvailability = "available";
+                                            if(typeof localAccess == "string") {
+                                                minorAvailability = localAccess;
+                                            } else if(typeof regionAccess == "string") {
+                                                minorAvailability = regionAccess;
                                             }
-                                        } else {
-                                            availability.minorGlitches = "unavailable";
                                         }
+                                        availability.minorGlitches = minorAvailability;
 
                                         // Overworld Glitches
                                         if(regionObjects[this.region].canEnter.owGlitches() && this.canAccess.owGlitches()) {
@@ -146,21 +150,16 @@ function initClasses(useGame) {
                                     if(universe == "zelda") {
                                         let regionAccess = regionObjects[this.region].canEnter.minorGlitches();
                                         let localAccess = regionObjects[this.region].canGetChest.minorGlitches();
+                                        let minorAvailability = "unavailable";
                                         if(regionAccess && localAccess) {
-                                            if(typeof regionAccess == "string" || typeof localAccess == "string") {
-                                                if(typeof regionAccess == "string") {
-                                                    availability.minorGlitches = regionAccess;
-                                                } else if(typeof localAccess == "string") {
-                                                    availability.minorGlitches = localAccess;
-                                                } else {
-                                                    availability.minorGlitches = "available";
-                                                }
-                                            } else {
-                                                availability.minorGlitches = "available";
+                                            minorAvailability = "available";
+                                            if(typeof localAccess == "string") {
+                                                minorAvailability = localAccess;
+                                            } else if(typeof regionAccess == "string") {
+                                                minorAvailability = regionAccess;
                                             }
-                                        } else {
-                                            availability.minorGlitches = "unavailable";
                                         }
+                                        availability.minorGlitches = minorAvailability;
                                     }
                                     return availability;
                                 }
@@ -170,6 +169,7 @@ function initClasses(useGame) {
                             dungeons[gameName].push(dungeon);
                             boss++;
                         } else {                                                // Point of Interest
+                            // Could be Important, Opened, Portal, Warp or Vanills
                             var chest = {
                                 isImportant: false,
                                 isOpened: false,
@@ -184,6 +184,7 @@ function initClasses(useGame) {
                                 chest.isWarp = location.type == "Warp";
                                 chest.isAvailable = function() {
                                     const availability = new Availability();
+                                    // Zelda uses Glitch levels
                                     if(universe == "zelda") {
                                         var tmp = "";
 
@@ -204,6 +205,7 @@ function initClasses(useGame) {
                                             availability.majorGlitches = tmp + " inactive";
                                         }
                                     }
+                                    // Metroid uses Logic levels
                                     if(universe == "metroid") {
                                         var tmp = "";
 
@@ -227,27 +229,23 @@ function initClasses(useGame) {
                                 chest.isVanilla = location.vanilla;
                                 chest.isAvailable = function() {
                                     const availability = new Availability();
+                                    // Zelda uses Glitch levels
                                     if(universe == "zelda") {
                                         if(regionObjects[this.region].canEnter.glitchless() && this.canAccess.glitchless()) {
                                             availability.glitchless = "available";
                                         }
                                         let regionAccess = regionObjects[this.region].canEnter.minorGlitches();
                                         let localAccess = this.canAccess.minorGlitches();
+                                        let minorAvailability = "unavailable";
                                         if(regionAccess && localAccess) {
-                                            if(typeof regionAccess == "string" || typeof localAccess == "string") {
-                                                if(typeof localAccess == "string") {
-                                                    availability.minorGlitches = localAccess;
-                                                } else if(typeof regionAccess == "string") {
-                                                    availability.minorGlitches = regionAccess;
-                                                } else {
-                                                    availability.minorGlitches = "available";
-                                                }
-                                            } else {
-                                                availability.minorGlitches = "available";
+                                            minorAvailability = "available";
+                                            if(typeof localAccess == "string") {
+                                                minorAvailability = localAccess;
+                                            } else if(typeof regionAccess == "string") {
+                                                minorAvailability = regionAccess;
                                             }
-                                        } else {
-                                            availability.minorGlitches = "unavailable";
                                         }
+                                        availability.minorGlitches = minorAvailability;
                                         if(regionObjects[this.region].canEnter.owGlitches() && this.canAccess.owGlitches()) {
                                             availability.owGlitches = "available";
                                         }
@@ -255,6 +253,7 @@ function initClasses(useGame) {
                                             availability.majorGlitches = "available";
                                         }
                                     }
+                                    // Metroid uses Logic levels
                                     if(universe == "metroid") {
                                         if(regionObjects[this.region].canEnter.casualLogic() && this.canAccess.casualLogic()) {
                                             availability.casualLogic = "available";
