@@ -1603,401 +1603,429 @@ function confirmSaveConfigToFirebase() {
 const vueMajor = parseInt(Vue.version);
 console.log(`Vue${vueMajor}: ${Vue.version}`);
 
-Vue.component('tracker-table', {
-  template: '#tracker-table',
-  props: [
-    'itemRows',
-    'trackerData'
-  ],
-  computed: {
-    maxRowLength: function() {
-      return !this.itemRows.reduce ? 0 : this.itemRows.map(function(i) {return i.length}).reduce(function(a,b) {
-          return Math.max(a, b);
-      });
+let vueSettings = {
+    options: {
+        data: function() {
+            return {
+                itemRows: [],
+                trackerData: window.trackerData,
+                displayVueMap: false
+            };
+        },
+        el: "#layoutdiv"
     },
-    inEditMode: function() {
-      return this.trackerData.editMode;
-    }
-  },
-  methods: {
-    itemFor: function(itemName) {
-      if(!this.trackerData || !this.trackerData.items) {
-        return null;
-      }
-      return this.trackerData[selectedGame].items[itemName];
-    },
-    addRow: function(e) {
-      vm.itemRows.push(['blank']);
-    },
-    addItem: function(rowIndex) {
-      vm.itemRows[rowIndex].push('blank');
-    },
-    removeItem: function(rowIndex) {
-      vm.itemRows[rowIndex].pop();
-      if(vm.itemRows[rowIndex].length === 0) {
-        vm.itemRows.splice(rowIndex,1);
-      }
-    }
-  }
-});
+    templates: {
+        "tracker-table": {
+            template: "#tracker-table",
+            props: [
+                "itemRows",
+                "trackerData"
+            ],
+            computed: {
+                maxRowLength: function() {
+                    return !this.itemRows.reduce ? 0 : this.itemRows.map(function(i) {return i.length}).reduce(function(a,b) {
+                        return Math.max(a, b);
+                    });
+                },
+                inEditMode: function() {
+                    return this.trackerData.editMode;
+                }
+            },
+            methods: {
+                itemFor: function(itemName) {
+                    if(!this.trackerData || !this.trackerData.items) {
+                        return null;
+                    }
+                    return this.trackerData[selectedGame].items[itemName];
+                },
+                addRow: function(e) {
+                    vm.itemRows.push(['blank']);
+                },
+                addItem: function(rowIndex) {
+                    vm.itemRows[rowIndex].push('blank');
+                },
+                removeItem: function(rowIndex) {
+                    vm.itemRows[rowIndex].pop();
+                    if(vm.itemRows[rowIndex].length === 0) {
+                        vm.itemRows.splice(rowIndex,1);
+                    }
+                }
+            }
+        },
+        "tracker-cell": {
+            template: '#tracker-cell',
+            props: [
+                'itemName',
+                'trackerData'
+            ],
+            computed: {
+                bossNum: function() {
+                    mBosses = {
+                        "13": "kraid",
+                        "14": "phantoon",
+                        "15": "draygon",
+                        "16": "ridley"
+                    };
+                    if(Object.values(mBosses).indexOf(this.itemName) > -1) {
+                        return Object.keys(mBosses)[Object.values(mBosses).indexOf(itemName)];
+                    }
+                    if(this.itemName.indexOf("boss") === -1) { return null; }
+                    return this.itemName.substring(6);
+                },
+                dungeonLabel: function() {
+                    if(
+                        this.bossNum &&
+                        this.trackerData[selectedGame] &&
+                        this.trackerData[selectedGame].showLabels &&
+                        dungeons[selectedGame][this.bossNum]
+                    ) {
+                        if(selectedGame == "zelda1") {
+                            return parseInt(this.bossNum) + 1;
+                        }
+                        return dungeons[selectedGame][this.bossNum].label;
+                    }
+                    return null;
+                },
+                itemLabel: function() {
+                    return fix_itemlabel(this.itemName);
+                },
+                textCounter: function() {
+                    var itemValue = this.trackerData[selectedGame].items[this.itemName];
+                    if(
+                        this.itemName.indexOf('heart') === 2 ||
+                        this.itemName.indexOf('missile') > -1 ||
+                        this.itemName.indexOf('powerbomb') > -1 ||
+                        this.itemName.indexOf('tank') > -1 ||
+                        this.itemName.indexOf('-node') > -1
+                    ) {
+                        if(
+                            this.itemName.indexOf('missile') > -1 ||
+                            this.itemName.indexOf('powerbomb') > -1
+                        ) {
+                            itemValue *= 5;
+                        }
+                        return itemValue;
+                    }
+                    return null;
+                },
+                backgroundImage: function() {
+                    var itemValue = this.trackerData[selectedGame].items[this.itemName];
+                    if(this.itemName === 'blank') {
+                        return this.trackerData[selectedGame].editMode ? 'url(' + build_img_url("blank") + ')' : 'none';
+                    }
+                    else if((typeof itemValue) === "boolean") {
+                        return 'url(' + build_img_url(this.itemName) + ')';
+                    }
+                    else if(this.textCounter !== null) {
+                        return 'url(' + build_img_url(this.itemName) + ')';
+                    }
+                    return 'url(' + build_img_url(this.itemName + (this.trackerData[selectedGame].editMode ? itemsMax[this.itemName] : (itemValue || '0'))) + ')';
+                },
+                isActive: function() {
+                    var itemValue = this.trackerData[selectedGame].items[this.itemName];
+                    return this.trackerData[selectedGame].editMode || itemValue;
+                },
+                isTunic: function() {
+                    let lowerItemName = this.itemName.toLowerCase();
+                    return lowerItemName.indexOf("tunic") > -1 || lowerItemName.indexOf("mail") > -1;
+                },
+                chestImage: function() {
+                    if(["zelda1","zelda3"].indexOf(selectedGame) == -1) { return null; }
 
-Vue.component('tracker-cell', {
-  template: '#tracker-cell',
-  props: [
-    'itemName',
-    'trackerData'
-  ],
-  computed: {
-    bossNum: function() {
-      mBosses = {
-        "13": "kraid",
-        "14": "phantoon",
-        "15": "draygon",
-        "16": "ridley"
-      };
-      if(Object.values(mBosses).indexOf(this.itemName) > -1) {
-        return Object.keys(mBosses)[Object.values(mBosses).indexOf(itemName)];
-      }
-      if(this.itemName.indexOf("boss") === -1) { return null; }
-      return this.itemName.substring(6);
-    },
-    dungeonLabel: function() {
-      if(
-        this.bossNum &&
-        this.trackerData[selectedGame] &&
-        this.trackerData[selectedGame].showLabels &&
-        dungeons[selectedGame][this.bossNum]
-      ) {
-        if(selectedGame == "zelda1") {
-          return parseInt(this.bossNum) + 1;
-        }
-        return dungeons[selectedGame][this.bossNum].label;
-      }
-      return null;
-    },
-    itemLabel: function() {
-      return fix_itemlabel(this.itemName);
-    },
-    textCounter: function() {
-      var itemValue = this.trackerData[selectedGame].items[this.itemName];
-      if(
-        this.itemName.indexOf('heart') === 2 ||
-        this.itemName.indexOf('missile') > -1 ||
-        this.itemName.indexOf('powerbomb') > -1 ||
-        this.itemName.indexOf('tank') > -1 ||
-        this.itemName.indexOf('-node') > -1
-        ) {
-        if(
-            this.itemName.indexOf('missile') > -1 ||
-            this.itemName.indexOf('powerbomb') > -1
-        ) {
-            itemValue *= 5;
-        }
-        return itemValue;
-      }
-      return null;
-    },
-    backgroundImage: function() {
-      var itemValue = this.trackerData[selectedGame].items[this.itemName];
-      if(this.itemName === 'blank') {
-        return this.trackerData[selectedGame].editMode ? 'url(' + build_img_url("blank") + ')' : 'none';
-      }
-      else if((typeof itemValue) === "boolean") {
-        return 'url(' + build_img_url(this.itemName) + ')';
-      }
-      else if(this.textCounter !== null) {
-        return 'url(' + build_img_url(this.itemName) + ')';
-      }
-      return 'url(' + build_img_url(this.itemName + (this.trackerData[selectedGame].editMode ? itemsMax[this.itemName] : (itemValue || '0'))) + ')';
-    },
-    isActive: function() {
-      var itemValue = this.trackerData[selectedGame].items[this.itemName];
-      return this.trackerData[selectedGame].editMode || itemValue;
-    },
-    isTunic: function() {
-      let lowerItemName = this.itemName.toLowerCase();
-      return lowerItemName.indexOf("tunic") > -1 || lowerItemName.indexOf("mail") > -1;
-    },
-    chestImage: function() {
-      if(["zelda1","zelda3"].indexOf(selectedGame) == -1) { return null; }
+                    // if(this.bossNum) {
+                    //     console.log(
+                    //         {
+                    //             bossNum: this.bossNum,
+                    //             trackerData: this.trackerData[selectedGame],
+                    //             dungeonchests: this.trackerData[selectedGame].dungeonchests
+                    //         }
+                    //     );
+                    // }
+                    if(
+                        this.bossNum &&
+                        this.trackerData[selectedGame] &&
+                        this.trackerData[selectedGame].showChests
+                    ) {
+                        return "url(" + build_img_url("chest" + this.trackerData[selectedGame].dungeonchests[this.bossNum]) + ")";
+                    }
+                    return null;
+                },
+                prizeImage: function() {
+                    if([null,"10","11","12"].indexOf(this.bossNum) > -1) {
+                        return null;
+                    }
+                    if(
+                        this.bossNum &&
+                        this.trackerData[selectedGame] &&
+                        this.trackerData[selectedGame].showPrizes
+                    ) {
+                        return "url(" +
+                        build_img_url(
+                            "dungeon" + this.trackerData[selectedGame].prizes[this.bossNum],
+                            "zelda3"
+                        ) +
+                        ")";
+                    }
+                    return null;
+                },
+                medallionImage: function() {
+                    if(selectedGame != "zelda3") { return null; }
+                    if((this.bossNum === "8" || this.bossNum === "9") && this.trackerData[selectedGame] && this.trackerData[selectedGame].showMedals) {
+                        return "url(" + build_img_url("medallion" + this.trackerData[selectedGame].medallions[this.bossNum]) + ")";
+                    }
+                    return null;
+                },
+                itemClass: function() {
+                    let itemGame = selectedGame;
+                    let className = "";
 
-    //   if(this.bossNum) {
-    //     console.log(
-    //         {
-    //             bossNum: this.bossNum,
-    //             trackerData: this.trackerData[selectedGame],
-    //             dungeonchests: this.trackerData[selectedGame].dungeonchests
-    //         }
-    //       );
-    //   }
-      if(
-        this.bossNum &&
-        this.trackerData[selectedGame] &&
-        this.trackerData[selectedGame].showChests
-      ) {
-        return "url(" + build_img_url("chest" + this.trackerData[selectedGame].dungeonchests[this.bossNum]) + ")";
-      }
-      return null;
-    },
-    prizeImage: function() {
-      if([null,"10","11","12"].indexOf(this.bossNum) > -1) {
-        return null;
-      }
-      if(
-        this.bossNum &&
-        this.trackerData[selectedGame] &&
-        this.trackerData[selectedGame].showPrizes
-      ) {
-        return "url(" +
-          build_img_url(
-            "dungeon" + this.trackerData[selectedGame].prizes[this.bossNum],
-            "zelda3"
-          ) +
-        ")";
-      }
-      return null;
-    },
-    medallionImage: function() {
-      if(selectedGame != "zelda3") { return null; }
-      if((this.bossNum === "8" || this.bossNum === "9") && this.trackerData[selectedGame] && this.trackerData[selectedGame].showMedals) {
-        return "url(" + build_img_url("medallion" + this.trackerData[selectedGame].medallions[this.bossNum]) + ")";
-      }
-      return null;
-    },
-    itemClass: function() {
-      let universe = selectedGame.substr(0,selectedGame.length - 1);
-      let itemGame = selectedGame;
-      let className = "";
+                    // FIXME: Use keys from Master Manifest
+                    for(let checkGame of ["zelda1","zelda3","metroid1","metroid3","averge1"]) {
+                        if(gameItems[checkGame]) {
+                            if(gameItems[checkGame].indexOf(this.itemName) > -1) {
+                                itemGame = checkGame;
+                            }
+                        }
+                    }
+                    className += this.dungeonLabel ? " dungeonCell" : "";
+                    className += " item-" + itemGame;
 
-      // FIXME: Use keys from Master Manifest
-      for(let checkGame of ["zelda1","zelda3","metroid1","metroid3","averge1"]) {
-        if(gameItems[checkGame]) {
-            if(gameItems[checkGame].indexOf(this.itemName) > -1) {
-            itemGame = checkGame;
-          }
-        }
-      }
-      className += this.dungeonLabel ? " dungeonCell" : "";
-      className += " item-" + itemGame;
+                    return className.trim();
+                },
+                ohkoClass: function() {
+                    // It's Z3
+                    // It's a Tunic
+                    let className = "";
+                    if(
+                        this.itemClass.toLowerCase().indexOf("item-zelda3") > -1 &&
+                        this.itemLabel.toLowerCase().indexOf("tunic") > -1
+                    ) {
+                        // OHKO is checked
+                        if(!this.trackerData[selectedGame].mapOHKO) {
+                            className += " ohko";
+                        }
+                        // Map State is inverted
+                        if(this.trackerData[selectedGame].mapState == "inverted") {
+                            className += " inverted";
+                        }
+                        return className;
+                    }
+                    return null;
+                },
+                swordlessClass: function() {
+                    // It's Z3
+                    // It's a Sword
+                    // Swordless is checked
+                    if(
+                        this.itemClass.toLowerCase().indexOf("item-zelda3") > -1 &&
+                        this.itemLabel.toLowerCase().indexOf("sword") > -1 &&
+                        !this.trackerData[selectedGame].mapSwords
+                    ) {
+                        return "swordless";
+                    }
+                    return null;
+                }
+            },
+            methods: {
+                clickCell: function(amt) {
+                    if((
+                        trackerData[selectedGame].mapSwords === false) &&
+                        (this.itemName.indexOf("z3sword") > -1)
+                    ) {
+                        return;
+                    }
+                    var itemValue = this.trackerData[selectedGame].items[this.itemName];
+                    if(this.trackerData[selectedGame].editMode) {
+                        Vue.set(vm.itemRows[this.rowIndex], this.columnIndex, this.trackerData[selectedGame].selected.item || 'blank');
+                        return;
+                    }
+                    // Non-edit mode clicks
+                    if(this.bossNum) {
+                        // Do both this and the below for bosses
+                        this.trackerData[selectedGame].dungeonbeaten[this.bossNum] = !this.trackerData[selectedGame].dungeonbeaten[this.bossNum];
+                        updateAll();
+                        updateCopies(manifests[selectedGame]["prefix"] + "boss" + this.bossNum, this.trackerData[selectedGame].dungeonbeaten[this.bossNum]);
+                    }
+                    // M1 Bosses
+                    if([
+                      //   "m1kraid",
+                      //   "m1ridley",
+                      //   "m1kraidtotem",
+                      //   "m1ridleytotem",
+                      //   "m1boss0",    // m1kraid
+                      //   "m1boss1",    // m1ridley
+                        "m3boss2",    // m3kraid
+                        "m3boss4",    // m3phantoon
+                        "m3boss6",    // m3draygon
+                        "m3boss8",    // m3ridley
+                        "m3boss9"     // mbm3
+                    ].indexOf(this.itemName) > -1) {
+                        console.log(this.itemName);
+                        let bosses = [];
+                        let bossIDX = -1;
+                        let bossName = "";
+                        if(selectedGame == "metroid1") {
+                            bosses = ["kraid","ridley","mb"];
+                        } else if(selectedGame == "metroid3") {
+                            bosses = [
+                                "bt",       // 0
+                                "spospo",   // 1
+                                "kraid",    // 2
+                                "croc",     // 3
+                                "phantoon", // 4
+                                "botwoon",  // 5
+                                "draygon",  // 6
+                                "gt",       // 7
+                                "ridley",   // 8
+                                "mb"        // 9
+                            ];
+                        }
+                        for(let [idx,boss] of Object.entries(bosses)) {
+                            if(this.itemName.indexOf(boss) > -1) {
+                                bossIDX = idx;
+                                bossName = boss;
+                            }
+                        }
+                        if(bossIDX == -1) {
+                            bossIDX = this.itemName.substring(-1);
+                        }
+                        this.trackerData[selectedGame].dungeonbeaten[bossIDX] = !this.trackerData[selectedGame].dungeonbeaten[bossIDX];
+                    }
+                    if((typeof itemValue) === "boolean"){
+                        this.trackerData[selectedGame].items[this.itemName] = !itemValue;
+                        updateCopies(this.itemName,!itemValue);
+                        updateAll();
+                    }
+                    else{
+                        var newVal = (itemValue || 0) + amt;
+                        if(newVal > itemsMax[this.itemName]){
+                            newVal = itemsMin[this.itemName];
+                        }
+                        if(newVal < itemsMin[this.itemName]){
+                            newVal = itemsMax[this.itemName];
+                        }
+                        this.trackerData[selectedGame].items[this.itemName] = newVal;
+                        updateAll();
+                    }
+                },
+                clickCellForward: function(e) {
+                    this.clickCell(1);
+                },
+                clickCellBack: function(e) {
+                    this.clickCell(-1);
+                },
+                clickMedallion: function(amt) {
+                    var limit = 4;    // Off
+                                      // Bombos
+                                      // Ether
+                                      // Quake
+                    var newVal = (
+                        this.trackerData[selectedGame].medallions[this.bossNum] +
+                        amt +
+                        limit
+                    ) %
+                    limit;
+                    // need to use splice here instead of just setting it the normal way or vue won't pick up the change
+                    this.trackerData[selectedGame].medallions.splice(this.bossNum, 1, newVal);
+                    updateAll();
+                },
+                clickMedallionForward: function(e) {
+                    this.clickMedallion(1);
+                },
+                clickMedallionBack: function(e) {
+                    this.clickMedallion(-1);
+                },
+                clickChest: function(amt) {
+                    var gameAbbr = manifests[selectedGame]["title"]["short"].toLowerCase();
+                    var chestitem = gameAbbr + 'chest' + this.bossNum;
 
-      return className.trim();
-    },
-    ohkoClass: function() {
-      // It's Z3
-      // It's a Tunic
-      let className = "";
-      if(
-        this.itemClass.toLowerCase().indexOf("item-zelda3") > -1 &&
-        this.itemLabel.toLowerCase().indexOf("tunic") > -1
-      ) {
-        // OHKO is checked
-        if(!this.trackerData[selectedGame].mapOHKO) {
-          className += " ohko";
-        }
-        // Map State is inverted
-        if(this.trackerData[selectedGame].mapState == "inverted") {
-          className += " inverted";
-        }
-        return className;
-      }
-      return null;
-    },
-    swordlessClass: function() {
-      // It's Z3
-      // It's a Sword
-      // Swordless is checked
-      if(
-        this.itemClass.toLowerCase().indexOf("item-zelda3") > -1 &&
-        this.itemLabel.toLowerCase().indexOf("sword") > -1 &&
-        !this.trackerData[selectedGame].mapSwords
-      ) {
-          return "swordless";
-      }
-      return null;
-    }
-  },
-  methods: {
-    clickCell: function(amt) {
-      if((
-        trackerData[selectedGame].mapSwords === false) &&
-        (this.itemName.indexOf("z3sword") > -1)
-      ) {
-          return;
-      }
-      var itemValue = this.trackerData[selectedGame].items[this.itemName];
-      if(this.trackerData[selectedGame].editMode) {
-          Vue.set(vm.itemRows[this.rowIndex], this.columnIndex, this.trackerData[selectedGame].selected.item || 'blank');
-        return;
-      }
-      // Non-edit mode clicks
-      if(this.bossNum) {
-        // Do both this and the below for bosses
-        this.trackerData[selectedGame].dungeonbeaten[this.bossNum] = !this.trackerData[selectedGame].dungeonbeaten[this.bossNum];
-        updateAll();
-        updateCopies(manifests[selectedGame]["prefix"] + "boss" + this.bossNum, this.trackerData[selectedGame].dungeonbeaten[this.bossNum]);
-      }
-      // M1 Bosses
-      if([
-        //   "m1kraid",
-        //   "m1ridley",
-        //   "m1kraidtotem",
-        //   "m1ridleytotem",
-        //   "m1boss0",    // m1kraid
-        //   "m1boss1",    // m1ridley
-          "m3boss2",    // m3kraid
-          "m3boss4",    // m3phantoon
-          "m3boss6",    // m3draygon
-          "m3boss8",    // m3ridley
-          "m3boss9"     // mbm3
-      ].indexOf(this.itemName) > -1) {
-        console.log(this.itemName);
-        let bosses = [];
-        let bossIDX = -1;
-        let bossName = "";
-        if(selectedGame == "metroid1") {
-            bosses = ["kraid","ridley","mb"];
-        } else if(selectedGame == "metroid3") {
-            bosses = [
-                "bt",       // 0
-                "spospo",   // 1
-                "kraid",    // 2
-                "croc",     // 3
-                "phantoon", // 4
-                "botwoon",  // 5
-                "draygon",  // 6
-                "gt",       // 7
-                "ridley",   // 8
-                "mb"        // 9
-            ];
-        }
-        for(let [idx,boss] of Object.entries(bosses)) {
-            if(this.itemName.indexOf(boss) > -1) {
-                bossIDX = idx;
-                bossName = boss;
+                    var limit = dungeonchestsInit[selectedGame][this.bossNum];
+                    let newVal = limit;
+                    if(this.trackerData[selectedGame]["items"][chestitem] !== undefined) {
+                        newVal = this.trackerData[selectedGame]["items"][chestitem];
+                    }
+                    let oldVal = newVal;
+                    newVal += amt;
+                    if(newVal < 0 || isNaN(newVal)) {
+                       newVal = limit;
+                    }
+                    if(newVal > limit) {
+                        newVal = 0;
+                    }
+                    console.log(
+                        {
+                            bossNum: this.bossNum,
+                            limit: limit,
+                            oldVal: oldVal,
+                            amt: amt,
+                            newVal: newVal
+                        }
+                    );
+
+                    this.trackerData[selectedGame]["items"][chestitem] = newVal;
+                    this.trackerData[selectedGame].dungeonchests.splice(this.bossNum, 1, newVal);
+                    console.log(
+                        `Clicked ${chestitem}`,
+                        newVal
+                    );
+                    updateAll();
+                },
+                clickChestForward: function(e) {
+                    this.clickChest(1);
+                },
+                clickChestBack: function(e) {
+                    this.clickChest(-1);
+                },
+                clickPrize: function(amt) {
+                    let limit = 7;  // Blue Crystal
+                                    // Red Crystal
+                                    // Off Pendant
+                                    // Green Pendant
+                                    // M3
+                                    // Z1
+                                    // M1
+                    var newVal = (
+                        this.trackerData[selectedGame].prizes[this.bossNum] +
+                        amt +
+                        limit
+                    ) %
+                    limit;
+                    // need to use splice here instead of just setting it the normal way or vue won't pick up the change
+                    this.trackerData[selectedGame].prizes.splice(this.bossNum, 1, newVal);
+                    updateAll();
+                },
+                clickPrizeForward: function(e) {
+                    this.clickPrize(1);
+                },
+                clickPrizeBack: function(e) {
+                    this.clickPrize(-1);
+                },
             }
         }
-        if(bossIDX == -1) {
-            bossIDX = this.itemName.substring(-1);
-        }
-        this.trackerData[selectedGame].dungeonbeaten[bossIDX] = !this.trackerData[selectedGame].dungeonbeaten[bossIDX];
-      }
-      if((typeof itemValue) === "boolean"){
-        this.trackerData[selectedGame].items[this.itemName] = !itemValue;
-        updateCopies(this.itemName,!itemValue);
-        updateAll();
-      }
-      else{
-        var newVal = (itemValue || 0) + amt;
-        if(newVal > itemsMax[this.itemName]){
-          newVal = itemsMin[this.itemName];
-        }
-        if(newVal < itemsMin[this.itemName]){
-          newVal = itemsMax[this.itemName];
-        }
-        this.trackerData[selectedGame].items[this.itemName] = newVal;
-        updateAll();
-      }
-    },
-    clickCellForward: function(e) {
-      this.clickCell(1);
-    },
-    clickCellBack: function(e) {
-      this.clickCell(-1);
-    },
-    clickMedallion: function(amt) {
-      var limit = 4;   // Off
-                        // Bombos
-                        // Ether
-                        // Quake
-      var newVal = (
-        this.trackerData[selectedGame].medallions[this.bossNum] +
-        amt +
-        limit
-      ) %
-      limit;
-      // need to use splice here instead of just setting it the normal way or vue won't pick up the change
-      this.trackerData[selectedGame].medallions.splice(this.bossNum, 1, newVal);
-      updateAll();
-    },
-    clickMedallionForward: function(e) {
-      this.clickMedallion(1);
-    },
-    clickMedallionBack: function(e) {
-      this.clickMedallion(-1);
-    },
-    clickChest: function(amt) {
-      var gameAbbr = manifests[selectedGame]["title"]["short"].toLowerCase();
-      var chestitem = gameAbbr + 'chest' + this.bossNum;
+    }
+};
 
-      var limit = dungeonchestsInit[selectedGame][this.bossNum];
-      let newVal = limit;
-      if(this.trackerData[selectedGame]["items"][chestitem] !== undefined) {
-        newVal = this.trackerData[selectedGame]["items"][chestitem];
-      }
-      let oldVal = newVal;
-      newVal += amt;
-      if(newVal < 0 || isNaN(newVal)) {
-        newVal = limit;
-      }
-      if(newVal > limit) {
-        newVal = 0;
-      }
-      console.log(
-        {
-            bossNum: this.bossNum,
-            limit: limit,
-            oldVal: oldVal,
-            amt: amt,
-            newVal: newVal
-        }
-      );
+if(vueMajor == 2) {
+    var vm = new Vue(vueSettings["options"]);
 
-      this.trackerData[selectedGame]["items"][chestitem] = newVal;
-      this.trackerData[selectedGame].dungeonchests.splice(this.bossNum, 1, newVal);
-      console.log(
-        `Clicked ${chestitem}`,
-        newVal
-      );
-      updateAll();
-    },
-    clickChestForward: function(e) {
-      this.clickChest(1);
-    },
-    clickChestBack: function(e) {
-      this.clickChest(-1);
-    },
-    clickPrize: function(amt) {
-      let limit = 7;   // Blue Crystal
-                        // Red Crystal
-                        // Off Pendant
-                        // Green Pendant
-                        // M3
-                        // Z1
-                        // M1
-      var newVal = (
-        this.trackerData[selectedGame].prizes[this.bossNum] +
-        amt +
-        limit
-      ) %
-      limit;
-      // need to use splice here instead of just setting it the normal way or vue won't pick up the change
-      this.trackerData[selectedGame].prizes.splice(this.bossNum, 1, newVal);
-      updateAll();
-    },
-    clickPrizeForward: function(e) {
-        this.clickPrize(1);
-    },
-    clickPrizeBack: function(e) {
-        this.clickPrize(-1);
-    },
-  }
-});
+    Vue.component(
+      "tracker-table",
+      vueSettings["templates"]["tracker-table"]
+    );
 
-var vm = new Vue({
-  data:{
-      itemRows: [],
-      trackerData: window.trackerData,
-      displayVueMap: false
-  },
-  el: '#layoutdiv'
-});
+    Vue.component(
+        "tracker-cell",
+        vueSettings["templates"]["tracker-cell"]
+    );
+} else if(vueMajor == 3) {
+    const vm = Vue.createApp(vueSettings["options"])
+    .component(
+        "tracker-table",
+        vueSettings["templates"]["tracker-table"]
+    )
+    .component(
+        "tracker-cell",
+        vueSettings["templates"]["tracker-cell"]
+    )
+    .mount(vueSettings["el"]);
+}
