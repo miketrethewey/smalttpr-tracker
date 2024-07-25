@@ -14,6 +14,7 @@
     background-image: url(../images/zelda3/chests/portal-metroid.gif) !important;
 }
 .chest.portal-metroid1.active {
+    background-color: #000000;
     background-image: url(../images/metroid1/inventory/screw.png) !important;
 }
 /*  Inactive */

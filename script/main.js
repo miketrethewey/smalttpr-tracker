@@ -158,12 +158,12 @@ function isAmmo(key) {
 }
 
 function setCookie(obj) {
-    console.log("ATTEMPTING TO TOSS COOKIE IN STORAGE");
+    // console.log("ATTEMPTING TO TOSS COOKIE IN STORAGE");
     try {
-        console.log(obj);
+        // console.log(obj);
         window.localStorage.setItem(gameSet, JSON.stringify(obj));
     } catch (e) {
-        console.log("FAILED TO TOSS COOKIE IN STORAGE");
+        // console.log("FAILED TO TOSS COOKIE IN STORAGE");
         // do nothing
     }
 }
@@ -225,25 +225,26 @@ function setConfigObject(configobj) {
             if(sData["type"] != "calculated") {
                 // console.log(`Setting in HTML Form: ${cookieKey} to ${cookieVal}`)
             }
-            let isRadio = eles.length > 1;
+            let test = -1;
+            let isRadio = eles.length > 1 || sData["type"] == "option";
             if(vals.indexOf(cookieVal) > -1) {
                 test = vals.indexOf(cookieVal);
             }
-            if(isRadio) {
-                // console.log("> Radio Selection");
+            if(isRadio && test > -1) {
                 eleNum = test;
-            } else {
-                // console.log("> Failed Radio Test:",cookieVal);
             }
             if(eles[eleNum]) {
                 let ele = eles[eleNum];
-                if(!isRadio) {
+                if(isRadio) {
+                    // console.log(` > ${domName}`,ele.value);
+                    ele.click();
+                } else if(sData["type"] == "toggle") {
                     ele.checked = !!configobj[selectedGame][cookieKey];
                     // console.log(` > ${domName}`,ele.checked);
                     ele.onchange();
-                } else {
-                    // console.log(` > ${domName}`,ele.value);
-                    ele.click();
+                } else if(sData["type"] == "value") {
+                    ele.value = configobj[selectedGame][cookieKey];
+                    ele.onchange();
                 }
             }
         }
@@ -277,7 +278,7 @@ function saveCookie(onInit = false) {
         console.log("ATTEMPTING TO LOAD INITIAL COOKIE");
         cookieobj = getConfigObjectFromCookie(onInit);
     } else {
-        console.log("ATTEMPTING TO BUILD COOKIE FROM CONFIG OBJ");
+        // console.log("ATTEMPTING TO BUILD COOKIE FROM CONFIG OBJ");
         cookieobj = getConfigObject();
         setCookie(cookieobj);
     }
@@ -825,10 +826,12 @@ function showPortals(sender) {
     trackerData[selectedGame].showPortals = sender.checked;
     let portals = document.querySelectorAll(".portal");
     if(sender.checked) {
+        // console.log("Showing Portals");
         portals.forEach(function(userItem) {
             userItem.classList.remove("hidden");
         });
     } else {
+        // console.log("Hiding Portals");
         portals.forEach(function(userItem) {
             userItem.classList.add("hidden");
         });
@@ -839,11 +842,15 @@ function showPortals(sender) {
         if(altGame == selectedGame) { continue; }
         let items = document.querySelectorAll(".item-" + altGame);
         if(sender.checked) {
+            // console.log(`Showing ${altGame} Items`);
             items.forEach(function(userItem) {
+                // console.log(`Showing ${userItem.title}`);
                 userItem.classList.remove("hidden");
             });
         } else {
+            // console.log(`Hiding ${altGame} Items`);
             items.forEach(function(userItem) {
+                // console.log(`Hiding ${userItem.title}`);
                 userItem.classList.add("hidden");
             });
         }
@@ -1654,15 +1661,15 @@ Vue.component('tracker-cell', {
       return this.itemName.substring(6);
     },
     dungeonLabel: function() {
-      if(selectedGame == "zelda1") {
-        return parseInt(this.bossNum) + 1;
-      }
       if(
         this.bossNum &&
         this.trackerData[selectedGame] &&
         this.trackerData[selectedGame].showLabels &&
         dungeons[selectedGame][this.bossNum]
       ) {
+        if(selectedGame == "zelda1") {
+          return parseInt(this.bossNum) + 1;
+        }
         return dungeons[selectedGame][this.bossNum].label;
       }
       return null;
