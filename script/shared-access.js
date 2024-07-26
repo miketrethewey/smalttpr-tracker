@@ -1,16 +1,21 @@
+// Availability "class"
 function Availability(glitchless = 'unavailable', minorGlitches = 'unavailable', owGlitches = 'unavailable', majorGlitches = 'unavailable') {
-    this._glitchless    = glitchless;
-    this._casualLogic   = glitchless;
-    this._minorGlitches = minorGlitches;
-    this._owGlitches    = owGlitches;
-    this._tourneyLogic  = owGlitches;
-    this._majorGlitches = majorGlitches;
+    this._glitchless    = glitchless;       // Zelda
+    this._casualLogic   = glitchless;       // Metroid
+
+    this._minorGlitches = minorGlitches;    // Zelda
+
+    this._owGlitches    = owGlitches;       // Zelda
+    this._tourneyLogic  = owGlitches;       // Metroid
+
+    this._majorGlitches = majorGlitches;    // Zelda
 
     this.getClassName = function () {
         return this[trackerData[selectedGame].mapLogic];
     }
 }
 
+// Metroid: Casual Logic
 Object.defineProperty(Availability.prototype, 'casualLogic', {
     get: function () {
         return this._casualLogic;
@@ -21,6 +26,7 @@ Object.defineProperty(Availability.prototype, 'casualLogic', {
     }
 });
 
+// Zelda: No Major Glitches
 Object.defineProperty(Availability.prototype, 'glitchless', {
     get: function () {
         return this._glitchless;
@@ -33,6 +39,7 @@ Object.defineProperty(Availability.prototype, 'glitchless', {
     }
 });
 
+// Zelda: Minor Glitches
 Object.defineProperty(Availability.prototype, 'minorGlitches', {
     get: function () {
         return this._minorGlitches;
@@ -44,6 +51,7 @@ Object.defineProperty(Availability.prototype, 'minorGlitches', {
     }
 });
 
+// Zelda: Overworld Glitches
 Object.defineProperty(Availability.prototype, 'owGlitches', {
     get: function () {
         return this._owGlitches;
@@ -54,6 +62,7 @@ Object.defineProperty(Availability.prototype, 'owGlitches', {
     }
 });
 
+// Metroid: Tournament Logic
 Object.defineProperty(Availability.prototype, 'tourneyLogic', {
     get: function () {
         return this._tourneyLogic;
@@ -63,6 +72,7 @@ Object.defineProperty(Availability.prototype, 'tourneyLogic', {
     }
 });
 
+// Zelda: Major Glitches
 Object.defineProperty(Availability.prototype, 'majorGlitches', {
     get: function () {
         return this._majorGlitches;
@@ -72,19 +82,25 @@ Object.defineProperty(Availability.prototype, 'majorGlitches', {
     }
 });
 
+// Get how much of an item we've got
 function getHas(item) {
-    var val = 0;
+    var val = 0;    // Default to 0
     let items = trackerData[selectedGame]["items"];
+    // Get all items
     if(items) {
+        // If the one we're looking for is here
         if(item in items) {
+            // Return the value
             val = items[item];
         }
     }
     return val;
 }
+
+// Determine if we've got an item
 function has(item, amount = -1) {
-    var ret = false;
-    var val = -1;
+    var ret = false;    // Default to not found
+    var val = -1;       // Default to nonsense
 
     var globalReplace = {
         lamp: "lantern",
@@ -95,105 +111,151 @@ function has(item, amount = -1) {
         item = globalReplace[item];
     }
 
+    // Check if we need prefix
+    let prefix = "";
     if(manifests[selectedGame]["prefix"]) {
-        item = manifests[selectedGame]["prefix"] + item;
+        prefix = manifests[selectedGame]["prefix"];
+        if(!item.startsWith(prefix)) {
+            item = prefix + item;
+        }
     }
 
+    // If there's no dot, we're doing something special
     if(item.indexOf('.') == -1) {
-        val = getHas(item);
-        ret = val > 0;
+        val = getHas(item); // Get value
+        ret = val > 0;      // Check if we've got some
 
         if(ret) {
+            // If it's not the amount we're looking for, false
             if(amount > -1 && val < amount) {
                 ret = false;
             }
         }
     }
 
+    // If SMALttPR or Quad and it's not Standard
     if((gameSet == "smalttpr" || gameSet == "quad") && item.indexOf("state") > -1) {
+        // Check for Open
         let open = trackerData.zelda3.mapState == "open";
+        // Check for Inverted
         let inverted = trackerData.zelda3.mapState == "inverted";
+        // If we're checking for Open State, send it
         if(item.indexOf("open") > -1) {
-            return open;
+            ret = open;
         }
+        // If we're checking for Inverted State, send it
         if(item.indexOf("inverted") > -1) {
-            return inverted;
+            ret = inverted;
         }
     }
+    // If we're checking for swords
     if(item.indexOf("swords") > -1) {
-        if(item.indexOf("swordless") > -1 && trackerData.zelda3.mapSwords == false) {
-            return true;
+        if(
+            item.indexOf("swordless") > -1 &&       // If we're checking for Swordless
+            trackerData.zelda3.mapSwords == false   // And Swordless is selected
+        ) {
+            ret = true;
         }
     }
+    // If we're checking for a Variation
     if(item.indexOf("variation") > -1) {
-        if(item.indexOf("ohko") > -1 && trackerData.zelda3.mapOHKO) {
-            return true;
+        if(
+            item.indexOf("ohko") > -1 &&    // If we're checking for OHKO
+            trackerData.zelda3.mapOHKO      // And OHKO is set
+        ) {
+            ret = true;
         }
     }
 
+    // Check for specials
+    // Keys, Crystals, Pendants, Medallions
     if(
         item.indexOf("key") > -1 ||        // FIXME: Keys for Dungeons
         item.indexOf("crystal") > -1 ||
         item.indexOf("pendant") > -1 ||
         item.indexOf("medallion") > -1
     ) {
-        let checkBK = item.indexOf("bigkey") > -1;
-        let checkKey = item.indexOf("key") > -1;
-        let checkCrystal = item.indexOf("crystal") > -1;
-        let checkRedCrystal = checkCrystal && (item.indexOf('5') > -1 || item.indexOf('6') > -1);
-        let checkPendant = item.indexOf("pendant") > -1;
-        let checkGreenPendant = checkPendant && (item.indexOf("green") > -1);
-        let checkPrize = checkCrystal || checkPendant;
-        let checkMedallion = item.indexOf("medallion") > -1;
+        // Checking for Big Key?
+        let checkBK             = item.indexOf("bigkey") > -1;
+        // Checking for any Key?
+        let checkKey            = item.indexOf("key") > -1;
+        // Checking for any Crystal?
+        let checkCrystal        = item.indexOf("crystal") > -1;
+        // Checking for any Pendant?
+        let checkPendant        = item.indexOf("pendant") > -1;
+        // Checking for a Prize?
+        let checkPrize          = checkCrystal || checkPendant;
+        // Checking for a Medallion?
+        let checkMedallion      = item.indexOf("medallion") > -1;
 
-        if(checkBK) {
-            return true;
-        } else if(checkKey) {
-            return true;
-        } else if(checkPrize) {
-            trackerData.zelda3.gotprizes = [0,0,0,0];
-            for(let k = 0; k < 10; k++) {
-                for(let j = 0; j < 4; j++) {
-                    if(
-                        trackerData.zelda3 &&
-                        trackerData.zelda3.prizes &&
-                        trackerData.zelda3.prizes[k] == j &&
-                        trackerData.zelda3.items["z3" + "boss" + k] === 2
-                    ) {
-                        trackerData.zelda3.gotprizes[j] += 1;
-                    }
-                }
-            }
-
-            let prizes = trackerData.zelda3.gotprizes;
-
+        if(checkBK) {   // FIXME: Big Key returns true
+            ret = true;
+        } else if(checkKey) {   // FIXME: Any Key returns true
+            ret = true;
+        } else if(checkPrize) { // Checking for Prizes
+            countPrizes();
+            let prizes = trackerData[selectedGame].gotprizes;
             if(item.indexOf("crystal") > -1) {
+                // Checking for Crystals
                 if(item.indexOf("all") > -1) {
-                    return prizes[CRYSTAL] == 5 && prizes[OJCRYSTAL] == 2;
+                    // All Crystals
+                    // 5 Blue, 2 Red
+                    ret = prizes[CRYSTAL] == 5 && prizes[OJCRYSTAL] == 2;
                 } else if(item.indexOf("5") > -1) {
-                    return prizes[OJCRYSTAL] >= 1;
+                    // Crystal 5 if at least one Red
+                    ret = prizes[OJCRYSTAL] >= 1;
                 } else if(item.indexOf("6") > -1) {
-                    return prizes[OJCRYSTAL] == 2;
+                    // Crystal 6 if we've got both Red
+                    ret = prizes[OJCRYSTAL] == 2;
                 }
             } else if(item.indexOf("pendant") > -1) {
+                // Checking for Pendants
                 if(item.indexOf("all") > -1) {
-                    return prizes[OFFPENDANT] == 2 && prizes[GREENPENDANT] == 1;
-                } else if(item.indexOf("red") > -1) {
-                    return prizes[OFFPENDANT] >= 1;
-                } else if(item.indexOf("blue") > -1) {
-                    return prizes[OFFPENDANT] == 2;
+                    // All Pendants
+                    // 2 Off, 1 Green
+                    ret = prizes[OFFPENDANT] == 2 && prizes[GREENPENDANT] == 1;
+                } else if(item.indexOf("offs") > -1) {
+                    // Offs if we've got both Off
+                    ret = prizes[OFFPENDANT] >= 1;
                 } else if(item.indexOf("green") > -1) {
-                    return prizes[GREENPENDANT] == 1;
+                    // Green
+                    ret = prizes[GREENPENDANT] == 1;
                 }
             }
-        } else if(checkMedallion) {
-            let dung = "";
-            if(item.indexOf("mire") > -1) {
+        } else if(checkMedallion) { // Checking for Entry Medallions
+            // Set success to false
+            let success = false;
+            let dung = "";  // Dungeon Name
+            let dungs = [   // Dungeon Names
+                "","","","","","","","",
+                "mire",
+                "trock"
+            ];
+            let medals = [  // Medallion Names
+                "?",
+                "bombos",
+                "ether",
+                "quake"
+            ];
+            if(item.indexOf("mire") > -1) { // Searching for Mire Entry
                 dung = "mire";
-            } else if(item.indexOf("trock") > -1) {
+            } else if(item.indexOf("trock") > -1) { // Searching for TRock Entry
                 dung = "trock";
             }
-            return true;
+            if(dung != "") {
+                // We figured out the Dungeon we're searching for
+                // Figure out the Medallion we need
+                let neededMedalID = trackerData[selectedGame]['medallions'][dungs.indexOf(dung)];
+                let neededMedal = medals[neededMedalID];
+                let haveAllMedals = has("bombos") && has("ether") && has("quake");
+                let haveNeededMedal = false;
+                if(neededMedalID > 0) {
+                    haveNeededMedal = has(neededMedal);
+                }
+                // Success if we've got the one we're looking for or if we've got all of them
+                success = haveNeededMedal || haveAllMedals;
+            }
+            ret = success;
         }
     }
 
@@ -203,18 +265,23 @@ function has(item, amount = -1) {
 // Helper functions to simplify logic.
 // ALttP Ability Functions
 function canDash() {
+    // Boots
     return has("boots");
 }
 
 function canActivateTablets() {
+    // Book and at least Sword2
     return has("book") && hasSword(2);
 }
 
 function canActivateMedallions() {
+    // Have a Sword or Swordless
     return hasSword() || has("swords.swordless");
 }
 
 function hasSword(min_level = 1) {
+    // Check for Sword minimu level
+    // Swordless Hammer counts as Sword2
     switch(min_level) {
         case 4:
             return has("sword",4);
@@ -230,58 +297,78 @@ function hasSword(min_level = 1) {
 }
 
 function canGrapple() {
+    // Hookshot
     return has("hookshot");
 }
 
 function canInvul() {
+    // Cape || Byrna
     return has("cape") || has("byrna");
 }
 
 function canRead() {
+    // Book
     return has("book");
 }
 
 function canSwim() {
+    // Flippers
     return has("flippers");
 }
 
 function canLiftRocks() {
+    // Power Glove
     return has("glove",1);
 }
 
 function canLiftDarkRocks() {
+    // Titan's Mitt
     return has("glove",2);
 }
 
 function canLightTorches() {
+    // FRod or Lamp
     return has("firerod") || has("lantern");
 }
 
 function canMeltThings() {
+    // FRod or can use Bombos
     return has("firerod") || (has("bombos") && canActivateMedallions());
 }
 
 function canFly() {
+    // Activated Flute
     return has("flute",2);
 }
 
 function canSpinSpeed() {
+    // Boots and Sword or Hookshot
     return canDash() && (has("sword",1) || canGrapple());
 }
 
 function canShootArrows() {
+    // Bow
     return has("bow");
 }
 
 function canBlockLasers() {
+    // Mirror Shield
     return has("shield",3);
 }
 
 function canExtendMagic() {
+    // At least 1/2 Magic or 1 Bottle
     return has("mpupgrade",1) || has("bottle",1);
 }
 
 function canKillMostThings(enemies = 5) {
+    // Sword
+    // Somaria
+    // Bombs and few enemies
+    // Byrna and few enemies or Magic Extension
+    // Bow
+    // Hammer
+    // FRod
     return (hasSword()
         && (has("swords.uncle") || has("swords.swordless")))        // FIXME: Swords Uncle/Swordless
         || has("somaria")
@@ -293,6 +380,9 @@ function canKillMostThings(enemies = 5) {
 }
 
 function canGetGoodBee() {
+    // Net
+    // Bottle
+    // Dash or Quake
     return has("net")
         && has("bottle")
         && (canDash()
@@ -300,6 +390,9 @@ function canGetGoodBee() {
 }
 
 function canBeatAga1(logic) {
+    // Aga's Alive
+    // Cape or Master Sword
+    // At least Sword1
     let darkNav = logic == "minor" && canDarkNav();
     let haveLamp = has("lantern");
     let ret = !has("agahnim")
@@ -320,12 +413,16 @@ function canBeatAga1(logic) {
 function canOpenGT() {
     let ret = true;
 
+    // Missing a Crystal, fail
     for(i = 1; i <= 7; i++) {
         if(! has("crystal" + i)) {
             ret = false;
         }
     }
 
+    // SMALttPR
+    // Show Portals in either Z3 or M3
+    // Mother Brain defeated
     if(
         roomid == "smalttpr"
         && trackerData
@@ -347,6 +444,7 @@ function canOpenGT() {
 }
 
 function isBunny(regionName = "",regionSubname = "") {
+    // Dark Places
     let darkRegions = [
         "PalaceOfDarkness",
         "SwampPalace",
@@ -357,28 +455,40 @@ function isBunny(regionName = "",regionSubname = "") {
         "TurtleRock"
     ];
 
+    // Light:   Link
+    // Dark:    Bunny
     let notBunny = "light";
     let bunny = "dark";
 
+    // Inverted
+    // Light:   Bunny
+    // Dark:    Link
     if(has("state.inverted")) {
         notBunny = "dark";
         bunny = "light";
     } else {
+        // Not Inverted
+        // Add GT as a Dark Place
         darkRegions.push("GanonsTower");
     }
 
+    // Checking Light World
     let world = "light";
     if(((regionName.toLowerCase().indexOf("dark")) > -1) || (darkRegions.indexOf(regionName) > -1)) {
+        // Checking Dark World
         world = "dark";
     }
 
+    // We're a bunny if we match Bunny World and No Pearl
     return (world == bunny) && !has("moonpearl");
 }
 
 function canAccessLightWorld() {
+    // Not Inverted, we start in LW
     if(!has("state.inverted")) {
         return true;
     } else if(has("state.inverted")) {
+        // Can we access LW?
         let warps = new HyruleWarpsMain();
         warps.initNoMajorGlitches();
         let south = warps.locations["South Hyrule Teleporter (Dark)"].glitchless();
@@ -391,14 +501,17 @@ function canAccessLightWorld() {
 }
 
 function canDarkNav() {
+    // Can't DarkNav if we can see
     return !has("lantern");
 }
 
 function canFakeFlipper() {
+    // Can't Fake Flipper if we can Swim
     return !canSwim();
 }
 
 function canWaterwalk() {
+    // Fake Flips and Pearl
     return canFakeFlipper() && has("moonpearl");
 }
 
@@ -408,6 +521,9 @@ function canWaterwalkStored() {
 }
 
 function canFakePowder() {
+    // Somaria
+    // Shroom
+    // Haven't done Shroom Quest
     let potionShop = chests.zelda3.find(function(e) { return e.name == "Potion Shop"; } );
     return has("somaria") && has("mushroom") && !potionShop.isOpened;
 }
@@ -416,11 +532,10 @@ function glitchedLinkInDarkWorld() {
     return has("moonpearl") || has("bottle",1);
 }
 
+// Can we kill the Wizard?
 function canGoBeatAgahnim1(allowOutOfLogicGlitches) {
-    return !has("agahnim")
-            && (has("lantern") || allowOutOfLogicGlitches)
-            && (has("cape") || hasSword(2))
-            && hasSword();
+    let canKillWizard = canBeatAga1(allowOutOfLogicGlitches ? "minor" : "");
+    return canKillWizard !== false;
 }
 
 function canEnterNorthEastDarkWorld(logic, agahnimCheck, allowOutOfLogicGlitches) {
@@ -682,6 +797,8 @@ function heatProof() {    // Varia Suit
 
 // TLoZ Ability functions
 function canShootArrowsZ1() {
+    // Bow
+    // Wood Arrows or Silver Arrows
     return canShootArrows() && (has("woods") || has("silvers"));
 }
 function canLightBushes() {

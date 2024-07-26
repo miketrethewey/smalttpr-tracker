@@ -1,18 +1,23 @@
+// Game Slug
 g = "metroid3";
+
+// Number of bosses to manage
 bosses = 5 +    // 5 Mini (BT, SpoSpo, Croc, Botwoon, GT)
          4 +    // 4 G4
          1;     // 1 Mother Brain
+
+// Set Manifest
 manifests[g] = {
-    slug: g,
-    title: {
+    slug: g,    // Game Slug
+    title: {    // Game Title
         full:   "Super Metroid",
         short:  "M3",
         crumb:  "Planet Zebes"
     },
-    prefix: "m3",
-    altGame: [ "zelda3" ],
-    regionFolder: "SuperMetroid",
-    defaultGrid: [
+    prefix: "m3",                   // Game Prefix
+    altGame: [ "zelda3" ],          // Alternate Game
+    regionFolder: "SuperMetroid",   // Region Folder
+    defaultGrid: [                  // Default Itemgrid
         [
             "m3missile",
             "m3supermissile",
@@ -60,6 +65,8 @@ manifests[g] = {
         ]
     ],
     items: {
+        // Item defns
+        // Toggles
         m3bombs:        { name: "Bombs" },
         m3charge:       { name: "Charge Beam" },
         m3grappling:    { name: "Grapple Beam" },
@@ -76,34 +83,33 @@ manifests[g] = {
         m3varia:        { name: "Varia Suit" },
         m3wave:         { name: "Wave Beam" },
         m3xray:         { name: "X-Ray Scope" },
+
+        // Progressives
         m3etank:        { name: "Energy Tank",      min: 0, max: 14 },
         m3rtank:        { name: "Reserve Tank",     min: 0, max:  4},
         m3missile:      { name: "Missiles",         min: 0, max: 40 },
         m3powerbomb:    { name: "Power Bomb",       min: 0, max: 10 },
         m3supermissile: { name: "Super Missile",    min: 0, max: 16 },
 
+        // Boss Tokens
         m3kraid:        { name: "Kraid Kill Credit" },
         m3phantoon:     { name: "Phantoon Kill Credit" },
         m3draygon:      { name: "Draygon Kill Credit" },
         m3ridley:       { name: "Ridley Kill Credit" },
 
-        m3boss0:        {
-            name: "Bomb Torizo Kill Credit",
-            chests: 0,
-            min: 1,
-            max: 2
-        },
-        m3boss1:        { name: "Spore Spawn Kill Credit",  chests: 0, min: 1, max: 2 },
-        m3boss2:        { name: "Kraid Kill Credit",        chests: 0, min: 1, max: 2 },
-        m3boss3:        { name: "Crocomire Kill Credit",    chests: 0, min: 1, max: 2 },
-        m3boss4:        { name: "Phantoon Kill Credit",     chests: 0, min: 1, max: 2 },
-        m3boss5:        { name: "Botwoon Kill Credit",      chests: 0, min: 1, max: 2 },
-        m3boss6:        { name: "Draygon Kill Credit",      chests: 0, min: 1, max: 2 },
-        m3boss7:        { name: "Gold Torizo Kill Credit",  chests: 0, min: 1, max: 2 },
-        m3boss8:        { name: "Ridley Kill Credit",       chests: 0, min: 1, max: 2 },
-        m3boss9:        { name: "Mother Brain Kill Credit", chests: 0, min: 1, max: 2 }
+        // Dungeons
+        m3boss0:        { name: "Bomb Torizo Kill Credit",  min: 1, max: 2 },
+        m3boss1:        { name: "Spore Spawn Kill Credit",  min: 1, max: 2 },
+        m3boss2:        { name: "Kraid Kill Credit",        min: 1, max: 2 },
+        m3boss3:        { name: "Crocomire Kill Credit",    min: 1, max: 2 },
+        m3boss4:        { name: "Phantoon Kill Credit",     min: 1, max: 2 },
+        m3boss5:        { name: "Botwoon Kill Credit",      min: 1, max: 2 },
+        m3boss6:        { name: "Draygon Kill Credit",      min: 1, max: 2 },
+        m3boss7:        { name: "Gold Torizo Kill Credit",  min: 1, max: 2 },
+        m3boss8:        { name: "Ridley Kill Credit",       min: 1, max: 2 },
+        m3boss9:        { name: "Mother Brain Kill Credit", min: 1, max: 2 }
     },
-    regions: {
+    regions: {  // Region defns
         crateria: [
             "central",
             "east",
@@ -133,11 +139,13 @@ manifests[g] = {
         m3tourian:          ["main"],
         m3hyruleportals:    ["main"],
     },
-    defaultSettings: {
+    defaultSettings: {  // Default settings
         mapLogic:   "casualLogic",
         mPos:       "Above",
         mZoom:      100
     },
+    // Record dungeon completion
     dungeonBeatenInit:  Array(bosses).fill(false),
+    // Record dungeon prize
     prizesInit:         Array(bosses).fill(4)
 };

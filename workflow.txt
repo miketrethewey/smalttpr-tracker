@@ -6,3 +6,10 @@ index.html
     Games included in Combo Rando
   script/shared.js          // Common functions
   script/includes.js        // LazyLoad a bunch of files
+  script/<selectedGame>/manifest.js // Get Game Manifest
+  script/items.js           // Set up Items
+  script/shared-access.js   // Global classes
+  script/classes/init.js    // Initialize Classes for use
+  script/vue/*              // Vue
+  script/options.js         // Options Manifest
+  script/main.js            // The Whole Kit'n'Kaboodle

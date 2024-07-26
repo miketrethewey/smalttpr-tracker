@@ -6,10 +6,6 @@
         <link rel="stylesheet" href="css/global.css" type="text/css">
         <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
         <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=" />
-        <script src="script/vue/2.7.16/vue.min.js"></script>
-        <!-- <script src="script/vue/3.4.34/vue.global.prod.js"></script> -->
-        <!-- <script src="https://unpkg.com/vue@2/dist/vue.min.js"></script> -->
-        <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script> -->
 
         <script src="script/loader/lazyload.js"></script>
         <script src="script/manifest.js"></script>
@@ -65,7 +61,7 @@
                 <legend>Map Tracker</legend>
                 <span style="float:right;">
                   <input type="checkbox" name="showmap" id="showmap" checked='checked' onchange="showTracker('mapdiv', this)"><label for="showmap">Enabled</label><br />
-                  <span class="zelda3-option metroid3-option"><input type="checkbox" id="showregion" onchange="showRegions(this)" /><label for="showregion">Regions</label><br /></span>
+                  <span class="smalttpr-option"><input type="checkbox" id="showregion" onchange="showRegions(this)" /><label for="showregion">Regions</label><br /></span>
                   <span class="zelda3-option"><input type="checkbox" name="showwarp" id="showwarp" checked='checked' onchange="showWarps(this)" /><label for="showwarp">Warps</label><br /></span>
                   <input type="checkbox" name="showportal" id="showportal" checked='checked' onchange="showPortals(this)" /><label for="showportal">Portals</label>
                 </span>
@@ -76,7 +72,7 @@
                     <input type='radio' name='maporientation' id="mOrien2" value='Vertical' onclick="setMapOrientation(true)"><label for="mOrien2">Vertical</label>
                 </div>
                 <div style="clear:right;"></div>
-                <fieldset class="zelda-option zelda3-option">
+                <fieldset class="zelda-option">
                     <legend>Position</legend>
                     <input type='radio' name='mapposition' id="mPos1" value='Above' onclick="setOrder(0)"><label for="mPos1">Above</label>
                     <input type='radio' name='mapposition' id="mPos2" value='Below' checked='checked' onclick="setOrder(1)"><label for="mPos2">Below</label>

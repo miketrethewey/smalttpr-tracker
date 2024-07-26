@@ -1,21 +1,26 @@
+// Game Slug
 g = "zelda3";
+
+// Number of bosses to manage
 bosses =  3 +   // Light World Dungeons
           7 +   // Dark World Dungeons
           1 +   // Hyrule Castle Tower
           1 +   // Ganon's Tower
           1 +   // Pyramid of Power: Ganon
           5+4+1;// M3
+
+// Set Manifest
 manifests[g] = {
-    slug: g,
-    title: {
+    slug: g,    // Game Slug
+    title: {    // Game Title
         full:   "The Legend of Zelda: A Link to the Past",
         short:  "Z3",
         crumb:  "Hyrule of Legend"
     },
-    prefix: "z3",
-    altGame: [ "metroid3" ],
-    regionFolder: "ALttP",
-    bossDefns: [
+    prefix: "z3",               // Game Prefix
+    altGame: [ "metroid3" ],    // Alternate Game
+    regionFolder: "ALttP",      // Region Folder
+    bossDefns: [                // Boss defns
         "ArmosKnights",
         "Lanmolas",
         "Moldorm",
@@ -29,7 +34,7 @@ manifests[g] = {
         "Trinexx",
         "Ganon"
     ],
-    defaultGrid: [
+    defaultGrid: [              // Default Itemgrid
         [
             "z3tunic",
             "z3bow",
@@ -141,6 +146,8 @@ manifests[g] = {
         ]
     ],
     items: {
+        // Item defns
+        // Toggles
         z3bow:          { name: "Bow" },
         z3bombos:       { name: "Bombos Medallion" },
         z3book:         { name: "Book of Mudora" },
@@ -164,6 +171,7 @@ manifests[g] = {
         z3quake:        { name: "Quake Medallion" },
         z3silvers:      { name: "Silver Arrow Upgrade" },
 
+        // Progressives
         z3agahnim:      { name: "Agahnim Story Marker", min: 0, max:  2 },
         z3bomb:         { name: "Bomb",                 min: 0, max:  2 },
         z3boomerang:    { name: "Boomerang",            min: 0, max:  3 },
@@ -177,6 +185,7 @@ manifests[g] = {
         z3sword:        { name: "Sword",                min: 0, max:  4 },
         z3tunic:        { name: "Tunic",                min: 1, max:  3 },
 
+        // Dungeons
         z3boss0: {
             name: "Eastern Palace",
             boss: "Armos Knights",
@@ -332,6 +341,7 @@ manifests[g] = {
             min: 1,
             max: 2
         },
+        // Final Bosses
         ganonz3: {
             name: "Ganon of Legend",
             boss: "Ganon",
@@ -357,18 +367,20 @@ manifests[g] = {
             max: 1
         },
     },
-    regions: {
+    regions: {  // Region defns
         // z3dungeons: ["main"],
         // overworld:  ["main"],
         // z3zebes:    ["z3-m3"],
     },
-    defaultSettings: {
+    defaultSettings: {  // Default settings
         mOrien:     "Vertical",
         mPos:       "Side",
-        // mZoom:      80,
         showMedals: true
     },
+    // Record dungeon completion
     dungeonBeatenInit:  Array(bosses).fill(false),
+    // Record dungeon prize
     prizesInit:         Array(bosses).fill(0),
+    // Record dungeon entry medallion
     medallionsInit:     Array(bosses).fill(0)
 };

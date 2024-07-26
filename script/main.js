@@ -1,68 +1,88 @@
-var cookielock = false;
-var cookieDefault = {};
-var chestsopenedInit = {};
-var chestsimportantInit = {};
-var chestsportalInit = {};
-var selectedGameSet = "";
-var trackerData = {};
+var cookielock = false;         // If the Cookie is Locked
+var cookieDefault = {};         // Default Cookie Data
+var chestsopenedInit = {};      // Chests Opened Status
+var chestsimportantInit = {};   // Important Chests
+var chestsportalInit = {};      // Portal Chests
+var selectedGameSet = "";       // Selected GameSet
+var trackerData = {};           // Global Tracker Data
 
+// Cycle through GameSets
 for(let [setID, gameSet] of Object.entries(megaManifest["gameSets"])) {
+    // This is our GameSet
     if(gameSet["games"].indexOf(selectedGame) > -1) {
         selectedGameSet = setID;
     }
+    // Initialize each Game of this GameSet
     for(let gameID of gameSet["games"]) {
         cookieDefault[gameID]       = {};
         chestsopenedInit[gameID]    = [];
         trackerData[gameID]         = {};
     }
 }
+
+// FIXME: Is this redundant?
 var gameSet = selectedGameSet;
+
+// Get Room ID for storage key
 var roomid = getParameterByName("roomid",window.location,null);
 if(roomid === null) {
     roomid = selectedGameSet;
 }
 
-for(var i = 0; i < chests[selectedGame].length; i++) {
-    chestsopenedInit[selectedGame].push(false);
-    chestsimportantInit[selectedGame].push(false);
-    chestsportalInit[selectedGame].push(false);
-    var d = document.createElement("div");
-    d.innerHTML = chests[selectedGame][i].name;
-    var title = d.textContent.trim() || d.innerText.trim() || d.innerHTML.trim();
-    if(title.indexOf('(') > -1) {
-        title = title.substr(0,title.indexOf('('));
+// Process each location
+for(let [locType,locs] in Object.entries({chests: chests, dungeons: dungeons})) {
+    if(!locs) { continue; }
+    for(let i = 0; i < locs[selectedGame].length; i++) {
+        if(locType == "chests") {
+            // Chests
+            chestsopenedInit[selectedGame].push(false);
+            chestsimportantInit[selectedGame].push(false);
+            chestsportalInit[selectedGame].push(false);
+        }
+
+        // All
+        let d = document.createElement("div");
+        if(locType == "chests") {
+            d.innerHTML = chests[selectedGame][i].name;
+        } else if(locType == "dungeons") {
+            d.innerHTML = dungeons[selectedGame][i].name;
+        }
+        let title = d.textContent.trim() || d.innerText.trim() || d.innerHTML.trim();
+        // If we've got a parenthesis, chop it there
+        if(title.indexOf('(') > -1) {
+            title = title.substring(0,title.indexOf('('));
+        }
+        let remove = ['+','/'];
+        for(let search in remove) {
+          title = title.replace(remove[search],"");
+        }
+
+        if(locType == "chests") {
+            // Chests
+            chests[selectedGame][i].titleEquipment  = chests[selectedGame][i].name;
+            chests[selectedGame][i].titleStripped   = title.trim();
+            chests[selectedGame][i].isSpicy         = (selectedGame == "metroid3") && (spicyChests.indexOf(i) > -1);
+        } else if(locType == "dungeons") {
+            // Dungeons
+            dungeons[selectedGame][i].titleEquipment    = dungeons[selectedGame][i].name;
+            dungeons[selectedGame][i].titleStripped     = title.trim();
+        }
     }
-    var remove = ['+','/'];
-    for(var search in remove) {
-      title = title.replace(remove[search],"");
-    }
-    chests[selectedGame][i].titleEquipment = chests[selectedGame][i].name;
-    chests[selectedGame][i].titleStripped = title.trim();
-    chests[selectedGame][i].isSpicy = (selectedGame == "metroid3") && (spicyChests.indexOf(i) > -1);
-}
-for(var i = 0; i < dungeons[selectedGame].length; i++) {
-    var d = document.createElement("div");
-    d.innerHTML = dungeons[selectedGame][i].name;
-    var title = d.textContent.trim() || d.innerText.trim() || d.innerHTML.trim();
-    var remove = ['+','/'];
-    for(var search in remove) {
-      title = title.replace(remove[search],"");
-    }
-    dungeons[selectedGame][i].titleEquipment = dungeons[selectedGame][i].name;
-    dungeons[selectedGame][i].titleStripped = title.trim();
 }
 
+// Initialize Default data
 let defaultData = {
-    items: itemsInit,
-    // chestsimportant: chestsimportantInit[selectedGame],
-    chestsopened: chestsopenedInit[selectedGame],
-    // chestsportal: chestsportalInit[selectedGame],
-    dungeonchests: [...dungeonchestsInit[selectedGame]],
-    dungeonbeaten: dungeonbeatenInit[selectedGame],
-    medallions: medallionsInit[selectedGame],
-    prizes: prizesInit[selectedGame]
+    items:              itemsInit,
+    chestsimportant:    chestsimportantInit[selectedGame],
+    chestsopened:       [...chestsopenedInit[selectedGame]],
+    chestsportal:       chestsportalInit[selectedGame],
+    dungeonchests:      [...dungeonchestsInit[selectedGame]],
+    dungeonbeaten:      [...dungeonbeatenInit[selectedGame]],
+    medallions:         medallionsInit[selectedGame],
+    prizes:             [...prizesInit[selectedGame]]
 };
 // console.log(`Setting ThisGame [${selectedGame}] Default Data to "Cookie" and "RAM"`);
+// Set Default data to "Cookie" and "RAM"
 for(let [key,val] of Object.entries(defaultData)) {
     if(cookieDefault[selectedGame][key] === undefined) {
         cookieDefault[selectedGame][key] = val;
@@ -85,6 +105,7 @@ let defaultOptions = {
 };
 // console.log(`Hacking Z3 and AVerge1 Settings into "Cookie" and "RAM"`);
 // console.log(`Adding Settings from ${selectedGame} Manifest into "Cookie" and "RAM"`);
+// Hacking Z3 & AVerge1 Settings into "Cookie" and "RAM"
 for(let gameName of megaManifest["gameSets"][gameSet]["games"]) {
     if(!(gameName in defaultOptions)) {
         defaultOptions[gameName] = [];
@@ -104,8 +125,8 @@ for(let gameName of megaManifest["gameSets"][gameSet]["games"]) {
     }
 }
 
+// Initialize Default settings
 let defaultSettings = {
-    gotprizes:  [0,0,0,0],
     editMode:   false,
     selected:   {}
 };
@@ -113,6 +134,7 @@ for(let [key,sData] of Object.entries(cookieKeys)) {
     defaultSettings[key] = sData["default"] !== undefined ? sData["default"] : false;
 }
 // console.log(`Setting Global Default Settings to "Cookie" and "RAM"`);
+// Set Global Default Settings to "Cookie" and "RAM"
 for(let [key,val] of Object.entries(defaultSettings)) {
     for(let gameName of megaManifest["gameSets"][gameSet]["games"]) {
         if(cookieDefault[gameName][key] === undefined) {
@@ -130,6 +152,8 @@ for(let [key,val] of Object.entries(defaultSettings)) {
 //     }
 // );
 
+// Is this a counter?
+// FIXME: Get from Game Manifest
 function isCounter(key) {
     let searches = [
         "heart",
@@ -144,6 +168,8 @@ function isCounter(key) {
         }
     }
 }
+// Is this Ammo?
+// FIXME: Get from Game Manifest
 function isAmmo(key) {
       let searches = [
           "missile",
@@ -157,6 +183,31 @@ function isAmmo(key) {
       }
 }
 
+// Count Dungeon Prizes
+function countPrizes() {
+    let limit = 7;
+    trackerData[selectedGame].gotprizes = Array(limit).fill(0);
+    for(let k = 0; k < trackerData[selectedGame].prizes.length; k++) {
+        for(
+            let j = 0;
+            j < limit;
+            j++
+        ) {
+            if(
+                trackerData[selectedGame] &&
+                trackerData[selectedGame].prizes &&
+                trackerData[selectedGame].prizes[k] == j &&
+                trackerData[selectedGame].items[manifests[selectedGame]["prefix"] + "boss" + k] === 2
+            ) {
+                trackerData[selectedGame].gotprizes[j] += 1;
+            }
+        }
+    }
+    let prizes = trackerData[selectedGame].gotprizes;
+    // console.log("Counted:",prizes);
+}
+
+// Save "Cookie" to storage
 function setCookie(obj) {
     // console.log("ATTEMPTING TO TOSS COOKIE IN STORAGE");
     try {
@@ -168,6 +219,7 @@ function setCookie(obj) {
     }
 }
 
+// Get "Cookie" from storage
 function getCookie() {
     var str = null;
     try {
@@ -185,6 +237,7 @@ function getCookie() {
     return JSON.parse(str);
 }
 
+// FIXME: Not sure of workflow on this
 function loadCookie() {
     // console.log("ATTEMPTING TO LOAD COOKIE");
     if (cookielock) {
@@ -197,10 +250,12 @@ function loadCookie() {
     cookielock = false;
 }
 
+// Is this a number?
 function isNumeric(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
+// Set settings from storage to webpage
 function setConfigObject(configobj) {
     window.vm.itemRows = configobj[selectedGame].items;
 
@@ -251,6 +306,7 @@ function setConfigObject(configobj) {
     }
 }
 
+// FIXME: No longer used?
 function updateConfigFromFirebase(configobj) {
     console.log("ATTEMPTING TO UPDATE FROM FIREBASE");
     var existingConfig = getConfigObjectFromCookie();
@@ -264,9 +320,11 @@ function updateConfigFromFirebase(configobj) {
     }
 }
 
+// FIXME: Does nothing
 function saveConfigToFirebase() {
 }
 
+// FIXME: Not sure of workflow on this
 function saveCookie(onInit = false) {
     if (cookielock) {
         // console.log("SAVE COOKIE FAILED: LOCKED");
@@ -286,6 +344,7 @@ function saveCookie(onInit = false) {
     cookielock = false;
 }
 
+// Nuke data from storage
 function resetCookie() {
     if (cookielock) {
         console.log("RESET COOKIE FAILED: LOCKED");
@@ -301,6 +360,7 @@ function resetCookie() {
     cookielock = false;
 }
 
+// Load data from configobj into trackerData
 function getConfigObjectFromCookie(getAllKeys = true) {
     configobj = getCookie();
     var globalKeys = [
@@ -343,6 +403,7 @@ function getConfigObjectFromCookie(getAllKeys = true) {
     return configobj;
 }
 
+// FIXME: Not sure of workflow on this
 function getConfigObject() {
     configobj.ts = (new Date()).getTime();
 
@@ -415,15 +476,18 @@ function toggleChest(x){
     updateAll();
 }
 
-var selectGame = '<span id="selectGame">[ ';
-
-var crumbs = {};
+// Breadcrumbs menu
+// FIXME: When in workflow does this get used? Move it to there.
+let selectGame = '<span id="selectGame">[ ';
+let crumbs = {};
 for(let gameID of megaManifest["gameSets"][gameSet]["games"]) {
     let crumb = manifests[gameID]["title"]["crumb"];
     crumbs[crumb] = "?game=" + gameID;
 }
 for(let gameSetID of Object.keys(megaManifest["gameSets"])) {
-    if(gameSetID == "averge1") { continue; }
+    if("hidden" in megaManifest["gameSets"][gameSetID]) {
+        continue;
+    }
     if(gameSetID != gameSet) {
         let gameID = megaManifest["gameSets"][gameSetID]["games"][0];
         let crumb = megaManifest["gameSets"][gameSetID]["crumb"];
@@ -442,7 +506,6 @@ for(let crumb in crumbs) {
     selectGame += ' | ';
 }
 selectGame += '<a href="faq.html">FAQ</a> | <a href="http://github.com/miketrethewey/smalttpr-tracker/">GitHub</a>';
-
 selectGame += '</span>';
 
 // Highlights a chest location and shows the name as caption
@@ -451,17 +514,20 @@ function highlight(x){
     document.getElementById("caption").innerHTML = selectGame + ' | ' + chests[selectedGame][x].titleEquipment + ' ]';
 }
 
+// Unhighlight chest location
+// Leave name within caption
 function unhighlight(x){
     document.getElementById(x).style.backgroundImage = "url(" + build_img_url("poi") + ")";
 //    document.getElementById("caption").innerHTML = selectGame;
 }
 
+// Figure out CSS class for this chest
 function chestClass(x) {
-    let ele = document.getElementById(x);
-    let chest = chests[selectedGame][x];
-    let className = "";
-    let availability = "";
+    let chest = chests[selectedGame][x];    // Get Chest
+    let className = "";                     // Calculated class name
+    let availability = "";                  // Availability
 
+    // Get Availability
     switch(trackerData[selectedGame].mapLogic) {
         case "glitchless":
             availability = chest.isAvailable().glitchless;
@@ -488,35 +554,39 @@ function chestClass(x) {
     for(let add in classNames) {
         className += classNames[add] + " ";
     }
+    // Chest type
     if(chest.type) {
-        className += chest.type + " ";
+        classNames.push(chest.type);
     }
+    // Important?
     if(chest.isImportant) {
-        className += "important ";
+        classNames.push("important");
     }
+    // Opened?
     if(chest.isOpened || (chest.name == "Weathervane" && has("flute",2))) {
-        className += "opened ";
+        classNames.push("opened");
     }
     if(chest.isWarp) {
-        // className += "portal ";
-        // className += "portal-" + selectedGame + " ";
-        className += "warp ";
-        className += "warp-" + selectedGame + " ";
+        // Warp?
+        classNames.push("warp");
+        classNames.push("warp-" + selectedGame);
         if(!document.getElementById("showwarp").checked) {
-            className += "hidden ";
+            classNames.push("hidden");
         }
     } else if(chest.isPortal) {
-        className += "portal ";
-        className += "portal-" + manifests[selectedGame]["altGame"][0] + " ";
+        // Portal?
+        classNames.push("portal");
+        classNames.push("portal-" + manifests[selectedGame]["altGame"][0]);
         if(!document.getElementById("showportal").checked) {
-            className += "hidden ";
+            classNames.push("hidden");
         }
     }
 
-    className += availability;
-    return className;
+    classNames.push(availability);  // Availability
+    return classNames.join(" ");
 }
 
+// Make this important
 function toggleImportant(x) {
     var ele = document.getElementById(x);
     var chest = chests[selectedGame][x];
@@ -530,11 +600,16 @@ function toggleImportant(x) {
     } else {
         ele.classList.remove(className);
     }
-    trackerData[selectedGame].chestsimportant[x] = makeImportant;
+
+    // FIXME: Not saving properly?
+    if(trackerData[selectedGame].chestsimportant) {
+        trackerData[selectedGame].chestsimportant[x] = makeImportant;
+    }
 
     saveCookie();
 }
 
+// Make this a Portal
 function togglePortal(x) {
     var ele = document.getElementById(x);
     var chest = chests[selectedGame][x];
@@ -544,6 +619,7 @@ function togglePortal(x) {
 
     chest.isPortal = makePortal;
 
+    // Base classes for a Portal
     let classNames = [
         "mapspan",
         "chest",
@@ -551,18 +627,21 @@ function togglePortal(x) {
         "active"
     ];
     if(makePortal) {
+        // Make it a Portal
         ele.className = "";
         for(let add in classNames) {
             ele.classList.add(classNames[add]);
         }
         ele.classList.add(className);
     } else {
+        // Make it not a Portal
         let add = "";
         ele.classList.remove("portal");
         ele.classList.remove(className);
         ele.classList.remove("active");
         ele.className = ele.className.trim();
 
+        // Get Availability
         switch(trackerData[selectedGame].mapLogic) {
             case "glitchless":
                 add = chest.isAvailable().glitchless;
@@ -584,36 +663,45 @@ function togglePortal(x) {
                 break;
         }
 
+        // Add Availability
         if(add != "") {
             add = add.trim();
             ele.classList.add(add);
         }
 
+        // Important?
         if(chest.isImportant) {
             ele.classList.add("important");
         }
 
+        // Opened?
         if(chest.isOpened) {
             ele.classList.add("opened");
         }
     }
 
-    trackerData[selectedGame].chestsportal[x] = makePortal;
+    // FIXME: Not saving properly?
+    if(trackerData[selectedGame].chestsportal) {
+        trackerData[selectedGame].chestsportal[x] = makePortal;
+    }
 
     saveCookie();
 }
 
-// Highlights a chest location and shows the name as caption (but for dungeons)
+// Highlights a dungeon location and shows the name as caption (but for dungeons)
 function highlightDungeon(x){
     document.getElementById("dungeon"+x).style.backgroundImage = "url(" + build_img_url("highlighted") + ")";
     document.getElementById("caption").innerHTML = selectGame + ' | ' + dungeons[selectedGame][x].titleEquipment + ' ]';
 }
 
+// Unhighlight dungeon location
+// Leave name within caption
 function unhighlightDungeon(x){
     document.getElementById("dungeon"+x).style.backgroundImage = "url(" + build_img_url("poi") + ")";
 //    document.getElementById("caption").innerHTML = selectGame;
 }
 
+// FIXME: Encapsulate into function
 var wikiRoomNames = {
      0: "Crateria Power Bomb Room",
      1: "The Final Missile",
@@ -717,16 +805,20 @@ var wikiRoomNames = {
     99: "Lower Norfair Fireflea Room",
 };
 
+// Clicking a chest
 function clickChest(e) {
     var x = e.target.id;
     switch(e.which) {
         // LEFT
         case 1:
             if(e.ctrlKey) {
+                // CTRL + Left
                 toggleImportant(x);
             } else if(e.shiftKey) {
+                // SHIFT + Left
                 togglePortal(x);
             } else {
+                // Just Left
                 toggleChest(x);
             }
             break;
@@ -735,6 +827,8 @@ function clickChest(e) {
         case 2:
             e.preventDefault();
             if(selectedGame == "metroid3" && wikiRoomNames[x]) {
+                // Middle
+                // Open WikiPage
                 window.open("http://wiki.supermetroid.run/" + wikiRoomNames[x]);
                 break;
             } else {
@@ -754,6 +848,7 @@ function clickChest(e) {
     }
 }
 
+// Toggle Chests on Dungeon Cells
 function showChest(sender) {
     if(["zelda1","zelda3"].indexOf(selectedGame) == -1) { return; }
 
@@ -762,6 +857,7 @@ function showChest(sender) {
     saveCookie();
 }
 
+// Toggle Dungeon Prizes on Dungeon Cells
 function showCrystal(sender) {
     if([
         "zelda1",
@@ -775,6 +871,7 @@ function showCrystal(sender) {
     saveCookie();
 }
 
+// Toggle Medallions on Dungeon Cells
 function showMedallion(sender) {
     if(selectedGame != "zelda3") { return; }
 
@@ -783,12 +880,14 @@ function showMedallion(sender) {
     saveCookie();
 }
 
+// Toggle Labels on Dungeon Cells
 function showLabel(sender) {
     trackerData[selectedGame].showLabels = sender.checked;
     refreshMap();
     saveCookie();
 }
 
+// Toggle Regions overlay
 function showRegions(sender) {
     if(gameSet != "smalttpr" && gameSet != "quad") { return; }
 
@@ -1406,11 +1505,6 @@ function initTracker() {
     var useGame = arguments[0];
     if(document && document.body) {
         document.body.classList.add(gameSet);
-        if(gameSet == "quad") {
-            for(let gameID of ["smalttpr","lozmx"]) {
-                document.body.classList.add(gameID);
-            }
-        }
         document.body.classList.add(selectedGame);
         populateMapdiv(useGame);
         populateItemconfig();
@@ -1863,7 +1957,6 @@ let vueSettings = {
                         console.log(this.itemName);
                         let bosses = [];
                         let bossIDX = -1;
-                        let bossName = "";
                         if(selectedGame == "metroid1") {
                             bosses = ["kraid","ridley","mb"];
                         } else if(selectedGame == "metroid3") {
@@ -1977,6 +2070,7 @@ let vueSettings = {
                     this.clickChest(-1);
                 },
                 clickPrize: function(amt) {
+                    // FIXME: Set a limit somewhere
                     let limit = 7;  // Blue Crystal
                                     // Red Crystal
                                     // Off Pendant

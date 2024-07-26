@@ -1,15 +1,17 @@
-var chests = {};
-var dungeons = {};
-var defaultItemGrid = {};
-var dungeonchestsInit = {};
-var dungeonbeatenInit = {};
-var itemNames = {};
-var prizesInit = {};
-var medallionsInit = {};
-var itemsMin = {};
-var itemsMax = {};
+var chests = {};            // Chest Map Locations
+var dungeons = {};          // Dungeon Map Locations
+var defaultItemGrid = {};   // Itemgrid
+var dungeonbeatenInit = {}; // Dungeon Completion
+var dungeonchestsInit = {}; // Dungeon Chests
+var itemsInit = {};         // Item Initialization
+var itemsMin = {};          // Item Minimums
+var itemsMax = {};          // Item Maximums
+var itemNames = {};         // Item Names
+var medallionsInit = {};    // Dungeon Entry Medallions
+var prizesInit = {};        // Dungeon Prizes
 
-var gameItems = {};
+var gameItems = {};         // Game Items by Game Short Name
+// FIXME: Hack in AVerge1
 gameItems.averge1 = [
     "axiom-disruptor",
     "nova",
@@ -58,15 +60,26 @@ gameItems.averge1 = [
     "range-node"
 ];
 
+// Cycle through games of selected gameset
 for(let gameID of megaManifest["gameSets"][gameSet]["games"]) {
-    chests[gameID] = [];
-    defaultItemGrid[gameID] = manifests[gameID]["defaultGrid"];
-    dungeons[gameID] = [];
-    dungeonbeatenInit[gameID] = manifests[gameID]["dungeonBeatenInit"];
-    dungeonchestsInit[gameID] = [];
-    medallionsInit[gameID] = manifests[gameID]["medallionsInit"];
-    gameItems[gameID] = Object.keys(manifests[gameID]["items"]);
-    prizesInit[gameID] = manifests[gameID]["prizesInit"];
+    // Chest Map Locations
+    // Dungeon Map Locations
+    // Itemgrid
+    // Dungeon Completion
+    // Dungeon Chests
+    // Item Initialization
+    // Game Items by Game Short Name
+    // Dungeon Entry Medallions
+    // Dungeon Prizes
+    chests[gameID]              = [];
+    dungeons[gameID]            = [];
+    defaultItemGrid[gameID]     = manifests[gameID]["defaultGrid"];
+    dungeonbeatenInit[gameID]   = manifests[gameID]["dungeonBeatenInit"];
+    dungeonchestsInit[gameID]   = [];
+    itemsInit                   = {};
+    gameItems[gameID]           = Object.keys(manifests[gameID]["items"]);
+    medallionsInit[gameID]      = manifests[gameID]["medallionsInit"];
+    prizesInit[gameID]          = manifests[gameID]["prizesInit"];
 }
 // console.log(
 //     {
@@ -79,7 +92,10 @@ for(let gameID of megaManifest["gameSets"][gameSet]["games"]) {
 //     }
 // );
 
-var itemsInit = {
+// Item Initialization
+// Set blank
+// FIXME: Hack in AVerge1
+itemsInit = {
     blank: false,
 
     "a1axiom-disruptor": false,
@@ -129,11 +145,19 @@ var itemsInit = {
     "a1range-node": 0
 };
 
+// Cycle through Games in loaded Game Items
 for([gameID,items] of Object.entries(gameItems)) {
+    // FIXME: Skip AVerge1
     if(gameID == "averge1") { continue; }
+
+    // Cycle through Items for this Game
     for(let item of items) {
-        let prefix = manifests[gameID]["prefix"] ? manifests[gameID]["prefix"] : "";
+        // Get Game Prefix
+        let prefix  = manifests[gameID]["prefix"] ? manifests[gameID]["prefix"] : "";
+        // Get Item Key
         let itemKey = item;
+        // If it doesn't start with or end with the prefix
+        // Prepend it
         if(
             !itemKey.startsWith(prefix) &&
             !itemKey.endsWith(prefix) &&
@@ -145,23 +169,30 @@ for([gameID,items] of Object.entries(gameItems)) {
         ) {
             itemKey = prefix + itemKey;
         }
+        // Get Item Data
         let itemData = manifests[gameID]["items"][itemKey];
+        // Set Pretty Item Name
         itemNames[itemKey] = itemData["name"];
+        // Set Initial Item Value
         itemsInit[itemKey] = "min" in itemData ? itemData["min"] : false;
+        // If we got chests, it's a dungeon, record dungeon chests
         if("chests" in itemData) {
             let bossNum = item.substring(item.indexOf("boss") + ("boss").length);
             dungeonchestsInit[gameID][bossNum] = itemData["chests"];
             itemsMax[prefix + 'chest' + bossNum] = itemData["chests"];
             // console.log(prefix,bossNum,dungeonchestsInit);
         }
+        // If we got a min, set it
         if("min" in itemData) {
             itemsMin[itemKey] = itemData["min"];
         }
+        // If we got a max, set it
         if("max" in itemData) {
             itemsMax[itemKey] = itemData["max"];
         }
     }
 }
+// FIXME: Hack in Final Bosses for Zelda3 view
 for(let newItem of ["ganonz3","mbm3","ganonz1","mbm1"]) {
     if("zelda3" in gameItems) {
         gameItems.zelda3.push(newItem);

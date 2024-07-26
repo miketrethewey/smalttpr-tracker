@@ -1,17 +1,21 @@
+// Game Slug
 g = "zelda1";
+// Number of bosses to manage
 bosses = 8 +    // Triforce Piece Dungeons
          1;     // Death Mountain: Ganon
+
+// Set Manifest
 manifests[g] = {
-    slug: g,
-    title: {
+    slug: g,    // Game Slug
+    title: {    // Game Title
         full:   "The Legend of Zelda",
         short:  "Z1",
         crumb:  "Ancient Hyrule"
     },
-    prefix: "z1",
-    altGame: [ "metroid1" ],
-    regionFolder: "TLoZ",
-    bossDefns: [
+    prefix: "z1",               // Game Prefix
+    altGame: [ "metroid1" ],    // Alternate Game
+    regionFolder: "TLoZ",       // Region Folder
+    bossDefns: [                // Boss defns
         "Aquamentus",
         "Digdogger",
         "Dodongo",
@@ -19,7 +23,7 @@ manifests[g] = {
         "Gohma",
         "Manhandla"
     ],
-    defaultGrid: [
+    defaultGrid: [              // Default Itemgrid
         [
             "z1boomerang",
             "z1bomb",
@@ -54,13 +58,9 @@ manifests[g] = {
             "z1boss0",
             "z1boss1",
             "z1boss2",
-        // ],
-        // [
             "z1boss3",
             "z1boss4",
             "z1boss5",
-        // ],
-        // [
             "z1boss6",
             "z1boss7",
         ],
@@ -69,6 +69,8 @@ manifests[g] = {
         ]
     ],
     items: {
+        // Item defns
+        // Toggles
         z1bracelet:         { name: "Bracelet" },
         z1book:             { name: "Book" },
         z1bow:              { name: "Bow" },
@@ -82,6 +84,7 @@ manifests[g] = {
         z1silvers:          { name: "Silver Arrows" },
         z1woods:            { name: "Wood Arrows" },
 
+        // Progressives
         z1boomerang:        { name: "Boomerang",        min: 0, max:  2 },
         z1bomb:             { name: "Bombs",            min: 0, max: 16 },
         z1bottle:           { name: "Bottle",           min: 0, max:  2 },
@@ -91,6 +94,7 @@ manifests[g] = {
         z1shield:           { name: "Shield",           min: 0, max:  2 },
         z1sword:            { name: "Sword",            min: 0, max:  3 },
 
+        // Dungeons
         z1boss0: {
             name: "Eagle",
             boss: "Aquamentus",
@@ -164,7 +168,7 @@ manifests[g] = {
             second: { name: "Pig" }
         },
     },
-    regions: {
+    regions: {  // Region defns
         overworld: [
             "freehint",
             "item",
@@ -190,10 +194,12 @@ manifests[g] = {
             "level9"
         ]
     },
-    defaultSettings: {
+    defaultSettings: {  // Default settings
         mapLogic:   "minorGlitches",
         mPos:       "Above"
     },
+    // Record dungeon completion
     dungeonBeatenInit:  Array(bosses).fill(false),
+    // Record dungeon entry medallion
     prizesInit:         Array(bosses).fill(5)
 };

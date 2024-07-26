@@ -48,28 +48,27 @@ function fix_region(str) {
 }
 
 var scripts = [];
-
-// JS: Get manifests for this gameSet
-var selectedGameSet = "";
-for(let [setID, gameSet] of Object.entries(megaManifest["gameSets"])) {
-    if(gameSet["games"].indexOf(selectedGame) > -1) {
-        selectedGameSet = setID;
-        for(let gameID of gameSet["games"]) {
-            scripts.push("script/" + gameID + "/manifest.js");
-        }
-    }
-}
-gameSet = selectedGameSet;
-
-// JS: Get global items
-scripts.push("script/items.js");
-// JS: Get global access
-scripts.push("script/shared-access.js");
-
 var sheets = [];
 
-// JS: Get Boss prototype
-scripts.push("script/classes/Boss.js");
+function addScript(script) {
+    if(scripts.indexOf(script) == -1) {
+        scripts.push(script);
+    }
+}
+function addSheet(sheet) {
+    if(sheets.indexOf(sheet) == -1) {
+        sheets.push(sheet);
+    }
+}
+function addAux(filepath) {
+    if(filepath.indexOf(".js") > -1) {
+        addScript(filepath);
+    } else if(filepath.indexOf(".css") > -1) {
+        addSheet(filepath);
+    }
+}
+
+let bossFiles = [];
 
 // FIXME: Find a way to get from manifest
 var bossDefns = {
@@ -97,50 +96,72 @@ var bossDefns = {
     ],
 };
 
-// JS: Get Boss defns
-for(var gameName in bossDefns) {
-    list = bossDefns[gameName];
-    for(var boss in list) {
-        boss = list[boss];
-        scripts.push("script/classes/Boss/Boss" + boss + ".js");
+// JS: Get manifests for this gameSet
+// CSS: Get NotCombo CSS
+var selectedGameSet = "";
+for(let [setID, gameSet] of Object.entries(megaManifest["gameSets"])) {
+    if(gameSet["nyi"]) { continue; }
+    if(gameSet["games"].indexOf(selectedGame) > -1) {
+        selectedGameSet = setID;
+        for(let gameID of gameSet["games"]) {
+            addAux("script/" + gameID + "/manifest.js");
+            // JS: Get Boss defns
+            if(gameID in bossDefns) {
+                list = bossDefns[gameID];
+                for(var boss in list) {
+                    boss = list[boss];
+                    bossFiles.push("script/classes/Boss/Boss" + boss + ".js");
+                }
+            }
+        }
+    } else {
+        addAux("css/gamesets/not" + setID + ".css");
     }
+}
+gameSet = selectedGameSet;
+
+// JS: Get global items
+addAux("script/items.js");
+// JS: Get global access
+addAux("script/shared-access.js");
+
+// JS: Get Boss prototype
+addAux("script/classes/Boss.js");
+
+// JS: Get Boss defns
+for(let filename of bossFiles) {
+    addAux(filename);
 }
 
 // JS: Get Location prototype
-scripts.push("script/classes/Location.js");
-scripts.push("script/classes/LocationCollection.js");
+addAux("script/classes/Location.js");
+addAux("script/classes/LocationCollection.js");
 // JS: Get Region prototype
-scripts.push("script/classes/Region.js");
+addAux("script/classes/Region.js");
 
 // JS: Get NES Region prototype
 if(gameSet == "lozmx" || gameSet == "quad") {
-    scripts.push("script/classes/Region/TLoZ.js");
-    scripts.push("script/classes/Region/Metroid.js");
+    addAux("script/classes/Region/TLoZ.js");
+    addAux("script/classes/Region/Metroid.js");
 }
 // JS: Get SNES Region prototype
 if(gameSet == "smalttpr" || gameSet == "quad") {
-    scripts.push("script/classes/Region/ALttP.js");
-    scripts.push("script/classes/Region/SuperMetroid.js");
+    addAux("script/classes/Region/ALttP.js");
+    addAux("script/classes/Region/SuperMetroid.js");
 }
 // JS: Get Averge1 Region prototype
 if(gameSet == "averge1") {
-    scripts.push("script/classes/Region/AxiomVerge.js");
+    addAux("script/classes/Region/AxiomVerge.js");
 }
 
 // CSS: Add Game CSS
 let universe = selectedGame.substr(0,selectedGame.length - 1);
-sheets.push("css/" + universe + '/' + universe.substr(0,1) + selectedGame.substr(-1) + '/' + universe + selectedGame.substr(-1) + ".css");
+addAux("css/" + universe + '/' + universe.substr(0,1) + selectedGame.substr(-1) + '/' + universe + selectedGame.substr(-1) + ".css");
 
 // CSS: Add NotUniverse CSS
 for(let u of ["zelda","metroid"]) {
     if(universe != u) {
-        sheets.push(`css/${u}/not${u}.css`);
-    }
-}
-// CSS: Add NotCombo CSS
-for(let g of ["lozmx","smalttpr"]) {
-    if(gameSet != g && gameSet != "quad") {
-        sheets.push(`css/gamesets/not${g}.css`)
+        addAux(`css/${u}/not${u}.css`);
     }
 }
 
@@ -148,21 +169,21 @@ for(let g of ["lozmx","smalttpr"]) {
 for(let g of ["zelda1","metroid1","zelda3","metroid3"]) {
     if(selectedGame != g) {
         let u = g.substring(0,g.length - 1);
-        sheets.push(`css/${u}/not${g}.css`)
+        addAux(`css/${u}/not${g}.css`)
     }
 }
 
 // CSS: Add Universe CSS
 if(universe == "zelda") {
-    sheets.push("css/zelda/zelda.css");
+    addAux("css/zelda/zelda.css");
 }
 if(universe == "metroid") {
-    sheets.push("css/metroid/metroid.css");
+    addAux("css/metroid/metroid.css");
 }
 
-sheets.push("css/portals.css");         // CSS: Portals
-sheets.push("css/wrapup.css");          // CSS: Wrap-Up
-scripts.push("script/classes/init.js"); // JS:  Initialize classes
+addAux("css/portals.css");         // CSS: Portals
+addAux("css/wrapup.css");          // CSS: Wrap-Up
+addAux("script/classes/init.js"); // JS:  Initialize classes
 
 // FIXME: Find a way to get from manifest
 var regionNames = {
@@ -299,17 +320,31 @@ for(var gameName in regionNames) {
                     url += "script/zelda3/region/" + regionName + '/' + segmentName + ".js";
                 }
 
-                scripts.push(url);
+                addAux(url);
             }
         }
     }
 }
 
-// scripts.push("script/vue/vue-2.5.16-min.js");   // JS: Vue
-scripts.push("script/options.js");              // JS: Switches
-scripts.push("script/main.js");                 // JS: Main App
+// JS : Vue
+let vueOptions = {
+    "ver":  2,
+    "mode": "local",
+    "local": {
+        "2": "script/vue/2.7.16/vue.min.js",
+        "3": "script/vue/3.4.34/vue.global.prod.js"
+    },
+    "online": {
+        "2": "https://unpkg.com/vue@2/dist/vue.min.js",
+        "3": "https://unpkg.com/vue@3/dist/vue.global.prod.js"
+    }
+};
+addAux(vueOptions[vueOptions["mode"]][vueOptions["ver"]]);
 
-// console.log({sheets:sheets,scripts:scripts});
+addAux("script/options.js");              // JS: Switches
+addAux("script/main.js");                 // JS: Main App
+
+console.log({sheets:sheets,scripts:scripts});
 
 // CSS: Load
 LazyLoad.css(sheets, function () {});

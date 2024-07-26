@@ -38,7 +38,7 @@ class LightWorldNorthWest extends LightWorld {
 
     if(this.buildLocations) {
         this.locations["Master Sword Pedestal"].glitchless = function() {
-            return has("pendantred") && has("pendantblue") && has("pendantgreen") && (! isBunny(region.name));
+            return has("pendant.all") && (! isBunny(region.name));
         }
         this.locations["King's Tomb"].glitchless = function() {
             let nwdw = new DarkWorldNorthWest("","",false);
